@@ -1,0 +1,23 @@
+{
+  "name": "Stacktical",
+  "version": "0.0.1",
+  "description": "Stacktical accurately predicts the scalability of your technology stack within seconds.",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Stacktical/stacktical-api.git"
+  },
+  "license": "SEE LICENSE IN LICENSE.md",
+  "main": "public/src/stacktical.js",
+  "dependencies": {
+    "body-parser": "1.14.1",
+    "express": "4.13.3",
+    "jwt-simple": "0.3.1",
+    "lodash": "4.6.1",
+    "morgan": "1.6.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Stacktical",
+  "homepage": "https://stacktical.com"
+}
