@@ -52,12 +52,9 @@ module.exports = {
 		  } else {
 		    // Parse the load test parameters
 		    app = JSON.parse(body);
-		    console.log(app.valid);
 		    if (app) {
-			if (app.valid) {
-				if (app.bench === "ci") {
-					console.log(app.bench);
-					console.log(app.params);
+			if (app.valid === 'true') {
+				if (app.method === "ci") {
 					params = app.params;
 					return done(body);
 				} else {
