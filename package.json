@@ -9,11 +9,9 @@
   "license": "SEE LICENSE IN LICENSE.md",
   "main": "public/src/stacktical.js",
   "dependencies": {
-    "body-parser": "1.14.1",
-    "express": "4.13.3",
-    "jwt-simple": "0.3.1",
-    "lodash": "4.6.1",
-    "morgan": "1.6.1"
+    "lodash": "^4.6.1",
+    "nock": "^8.0.0",
+    "request": "^2.72.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
