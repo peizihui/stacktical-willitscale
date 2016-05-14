@@ -1,20 +1,23 @@
+/***************
+* Dependencies *
+***************/
 var request = require('request');
-//var lodash = require('lodash');
+var lodash = require('lodash');
 
 var API_URL = 'https://stacktical.com/api/v1/'
 var debug = true;
-var apiKey;
 
-// TODO check the lengh validity of the api key
-if (process.argv[2])
+if (process.argv[2] && process.argv[3])
 {
-	apiKey = process.argv[2];
+	var apiKey = new Buffer(process.argv[2] + ":" + process.argv[3]).toString('base64');
 	console.log("Starting Stacktical bench image with api key: " + apiKey);
 } else {
 	console.error("Could not read api key parameter, please provide api key as parameter of the script");
 }
 
-/**
+
+
+/***************
 *Fetch load testing parameters
 *GET /tests/{apiKey}/parameters
 *
@@ -23,7 +26,7 @@ if (process.argv[2])
 *
 *Submit the load results
 *POST /reports/scalability
-*/
+****************/
 
 // Set request defaults
 var request = request.defaults({
@@ -31,7 +34,8 @@ var request = request.defaults({
   headers: [
   {
     name :'Content-Type',
-    value: 'application/json'
+    value: 'application/json',
+    apikey: apiKey
   }]
 })
 
@@ -40,71 +44,63 @@ var app,
     params;
 
 // Fetch load test parameters from stacktical
-module.exports = {
-	getparams: function(apiKey, done) {
-		request.get({url: '/tests/parameters', headers: {apikey: apiKey}}, function(error, response, body) {
-		  if (debug === true) {
-		    // For debugging
-		    console.log(body);
-		  }
-		  if (error) {
-		    console.error(error);
-		  } else {
-		    // Parse the load test parameters
-		    app = JSON.parse(body);
-		    if (app) {
-			if (app.valid === 'true') {
-				if (app.method === "ci") {
-					params = app.params;
-					return done(body);
-				} else {
-					console.error("This application is not configured to run in the CI plugin, please check our settings in stacktical website");
-				}
+var bench = {};
+bench.getparams = function(apiKey, callback) {
+	request.get({url: '/tests/parameters'}, function(error, response, body) {
+	  if (debug === true) {
+	    // For debugging
+	    console.log(body);
+	  }
+	  if (error) {
+	    console.error(error);
+	  } else {
+	    // Parse the load test parameters
+	    app = JSON.parse(body);
+	    if (app) {
+		if (app.valid === 'true') {
+			if (app.method === "ci") {
+				callback(null, app);
 			} else {
-				console.error("Invalid Application, please make sure the apikey is associed to a valid application");
+				console.error("This application is not configured to run in the CI plugin, please check our settings in stacktical website");
 			}
-		    } else {
-			console.error("Could not parse application info");
-		    }
-		  }
-		})
-	}
-};
-// Run the test load
-//request.post({url: '/test/loop'}, function(error, response, body) {
-//  if (debug === true) {
-//    console.log(body);
-//  }
-//  if (error) {
-//    console.error(error);
-//  }
-//  var results = getThroughput(10,"https://stacktical.com");
-//  console.log(results);
-//})
-/**
-// Submit the load result
-request.post({url: '/reports/scalability'}, function(error, response, body) {
-  if (debug === true) {
-    console.log(body);
-  }
-  if (error) {
-    console.error(error);
-  } else {
-    console.log("Successfully sumitted load test results to stacktical. Exiting...");
-  }
-})
+		} else {
+			console.error("Invalid Application, please make sure the apikey is associed to a valid application");
+		}
+	    } else {
+		console.error("Could not parse application info");
+	    }
+	  }
+	})
+}
 
-function getThroughput(params) {
+// Submit the load result
+bench.submit = function (results, callback) {
+	request.post({url: '/reports/scalability'}, function(error, response, body) {
+	if (debug === true) {
+		console.log(body);
+	}
+	if (error) {
+		console.error(error);
+	} else {
+		console.log("Successfully sumitted load test results to stacktical. Exiting...");
+		callback();
+	}
+	})
+}
+
+bench.getThroughput = function (err, app) {
+    console.log("Start Load testing");
     var result;
+    var params = app.params;
 
     var spawn = require('child_process').spawn;
 
     var loadTest = spawn('siege',
     [
-        "-t60s",
-        "-c"+params.concurrency,
+        "-t" + params.time + "s",
+        "-c"+ params.concurrency,
         "-b",
-        params.url
+        app.endoint
     ]);
 
     // For some reason, the transaction rate is part of stderr, not stdout
@@ -142,4 +138,5 @@ function getThroughput(params) {
 
 };
 
-*/
+
+module.exports = bench;
