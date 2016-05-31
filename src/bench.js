@@ -100,7 +100,7 @@ bench.getThroughput = function (err, app) {
         "-t" + params.time + "s",
         "-c"+ params.concurrency,
         "-b",
-        app.endoint
+        app.endpoint
     ]);
 
     // For some reason, the transaction rate is part of stderr, not stdout

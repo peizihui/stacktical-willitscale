@@ -13,9 +13,7 @@ describe('bench', function() {
 				method: 'ci',
 				params: {
 					concurrency: '10',
-					time: '6',
-					run: '2',
-					increment: '5'
+					time: '6'
 				}
 			});
 		bench.getparams('1', function(benchDetails) {
@@ -31,13 +29,16 @@ describe('bench', function() {
 						endpoint: 'https://stacktical.com',
 						params: {
 							concurrency: '5',
-							time: '6',
-							run: '1',
-							increment: '5'
+							time: '6'
 						}
 					});
-		console.log(results);
-		done;
+		// TODO need to be synchrone here to allow the load test
+		// results
+		// Currently returns undefined
+		setTimeout(function(results) {
+			console.log(results);
+			done()
+		}, 6500);
 	});
 
 	it('submit() should send load testing result', function (done) {
