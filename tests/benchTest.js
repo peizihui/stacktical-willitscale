@@ -1,9 +1,8 @@
-var fs      = require('fs');
 var nock = require('nock');
-var bench = require('../src/stacktical.js');
-//var API_URL = 'https://stacktical.com/api/v1/'
-config = JSON.parse(fs.readFileSync('./src/config'));
+var bench = require('../src/components/stacktical-bench.js');
+config = require('../src/config/config.js');
 
+console.log(config);
 describe('bench', function() {
 	it('getparams() should send the details of the benchmark parameters', function (done) {
 		nock(config.api_url)
