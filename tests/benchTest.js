@@ -1,6 +1,6 @@
 var fs      = require('fs');
 var nock = require('nock');
-var bench = require('../src/bench');
+var bench = require('../src/stacktical.js');
 //var API_URL = 'https://stacktical.com/api/v1/'
 config = JSON.parse(fs.readFileSync('./src/config'));
 
