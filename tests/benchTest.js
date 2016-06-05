@@ -1,10 +1,12 @@
+var fs      = require('fs');
 var nock = require('nock');
 var bench = require('../src/bench');
-var API_URL = 'https://stacktical.com/api/v1/'
+//var API_URL = 'https://stacktical.com/api/v1/'
+config = JSON.parse(fs.readFileSync('./src/config'));
 
 describe('bench', function() {
 	it('getparams() should send the details of the benchmark parameters', function (done) {
-		nock(API_URL)
+		nock(config.api_url)
 			.get('/tests/parameters')
 			.reply(200, {
 				name: 'stacktical',
@@ -13,7 +15,9 @@ describe('bench', function() {
 				method: 'ci',
 				params: {
 					concurrency: '10',
-					time: '6'
+					time: '6',
+					run: '2',
+					increment: '5'
 				}
 			});
 		bench.getparams('1', function(benchDetails) {
@@ -42,7 +46,7 @@ describe('bench', function() {
 	});
 
 	it('submit() should send load testing result', function (done) {
-		nock(API_URL)
+		nock(config.api_url)
 			.post('/reports/scalability')
 			.reply(200,
 				{"status":200,"error":false,"report":{}}

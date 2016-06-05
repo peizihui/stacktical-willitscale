@@ -1,10 +1,12 @@
 /***************
 * Dependencies *
 ***************/
+var fs      = require('fs');
 var request = require('request');
 var lodash = require('lodash');
 
-var API_URL = 'https://stacktical.com/api/v1/'
+//var API_URL = 'https://stacktical.com/api/v1/'
+config = JSON.parse(fs.readFileSync('./src/config'));
 var debug = true;
 
 if (process.argv[2] && process.argv[3])
@@ -30,7 +32,7 @@ if (process.argv[2] && process.argv[3])
 
 // Set request defaults
 var request = request.defaults({
-  baseUrl: API_URL,
+  baseUrl: config.api_url,
   headers: [
   {
     name :'Content-Type',
@@ -82,6 +84,7 @@ bench.submit = function (results, callback) {
 	if (error) {
 		console.error(error);
 	} else {
+		app = JSON.parse(body);
 		console.log("Successfully sumitted load test results to stacktical. Exiting...");
 		callback();
 	}
