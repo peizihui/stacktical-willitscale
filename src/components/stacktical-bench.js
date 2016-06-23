@@ -77,7 +77,7 @@ bench.submit = function (results, callback) {
 	})
 }
 
-bench.getThroughput = function (app) {
+bench.getThroughput = function (err, app) {
     console.log("Start Load testing");
     console.log(app);
     var result;
