@@ -1,11 +1,11 @@
 var nock = require('nock');
+config = require('../src/config/config.js')();
 var bench = require('../src/components/stacktical-bench.js');
-config = require('../src/config/config.js');
 
 console.log(config);
 describe('bench', function() {
 	it('getparams() should send the details of the benchmark parameters', function (done) {
-		nock(config.api_url)
+		nock(config.apiUrl)
 			.get('/tests/parameters')
 			.reply(200, {
 				name: 'stacktical',
@@ -45,7 +45,7 @@ describe('bench', function() {
 	});
 
 	it('submit() should send load testing result', function (done) {
-		nock(config.api_url)
+		nock(config.apiUrl)
 			.post('/reports/scalability')
 			.reply(200,
 				{"status":200,"error":false,"report":{}}

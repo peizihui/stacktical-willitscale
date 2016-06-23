@@ -4,7 +4,7 @@
 var request = require('request');
 var lodash = require('lodash');
 
-config = require('../config/config.js');
+config = require('../config/config.js')();
 var debug = true;
 
 if (process.argv[2] && process.argv[3]) {
@@ -28,7 +28,7 @@ if (process.argv[2] && process.argv[3]) {
 
 // Set request defaults
 var request = request.defaults({
-  baseUrl: config.api_url,
+  baseUrl: config.apiUrl,
   headers: [
   {
     name :'Content-Type',
@@ -54,20 +54,8 @@ bench.getparams = function(apiKey, callback) {
 	  } else {
 	    // Parse the load test parameters
 	    app = JSON.parse(body);
-	    if (app) {
-		if (app.valid === 'true') {
-			if (app.method === "ci") {
-				//callback(null, app);
-				return app;
-			} else {
-				console.error("This application is not configured to run in the CI plugin, please check our settings in stacktical website");
-			}
-		} else {
-			console.error("Invalid Application, please make sure the apikey is associed to a valid application");
-		}
-	    } else {
-		console.error("Could not parse application info");
-	    }
+	    //return app;
+	    callback(null, app);
 	  }
 	})
 }
@@ -89,8 +77,9 @@ bench.submit = function (results, callback) {
 	})
 }
 
-bench.getThroughput = function (err, app) {
+bench.getThroughput = function (app) {
     console.log("Start Load testing");
+    console.log(app);
     var result;
     var params = app.params;
 
