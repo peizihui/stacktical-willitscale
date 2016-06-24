@@ -17,11 +17,11 @@ console.log(config.apiUrl);
  * 3 format and submit the data
  */
 
-for(var count=5;count<=10;count = count+5) {
+for(var count=5;count<=15;count = count+5) {
 	var app = {
 	params: {
 		concurrency: count,
-		time: 6,
+		time: 10,
 		run: 2,
 		increment: 5
 		},
