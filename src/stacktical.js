@@ -17,23 +17,34 @@ console.log(config.apiUrl);
  * 3 format and submit the data
  */
 
-for(var count=5;count<=15;count = count+5) {
-	var app = {
-	params: {
-		concurrency: count,
-		time: 10,
-		run: 2,
-		increment: 5
-		},
-	endpoint: 'http://clipifire.com'
-	};
-	console.log(app);
+	//console.log(app);
 	//bench.getThroughput(app);
-	setTimeout(function() {
-		bench.getThroughput(null, app);
-	}, app.params.time+2000);
-	
-}
+	var count =0;
+	function iterateload() {
+		count = count + 20;
+		console.log(count);
+		var app = {
+			params: {
+				concurrency: count,
+				time: 1,
+				run: 2,
+				increment: 5
+				},
+			endpoint: 'http://clipifire.com'
+		};
+		console.log(app);
+		var timeoutObject = setTimeout(function() {
+				bench.getThroughput(null, app);
+				if (count >= 80) {
+					clearTimeout(timeoutObject);
+				} else {
+					iterateload();
+				}
+			}
+			, 2000
+		);
+	}
+	iterateload();
 
 //if (app) {
 //		if (app.valid === 'true') {

@@ -93,7 +93,6 @@ bench.getThroughput = function (err, app) {
         app.endpoint
     ]);
 
-    console.log(loadTest.stderr.toString());
     // For some reason, the transaction rate is part of stderr, not stdout
     result = loadTest.stderr.toString()
 
