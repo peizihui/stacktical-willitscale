@@ -1,5 +1,5 @@
-var bench = require('./components/stacktical-bench.js');
 config = require('./config/config.js')();
+var bench = require('./components/stacktical-bench.js');
 
 console.log(config.apiUrl);
 
@@ -19,10 +19,10 @@ console.log(config.apiUrl);
 
 	//console.log(app);
 	//bench.getThroughput(app);
-	var count =0;
+	var submit = {'points' : []}
+	var count = 0;
 	function iterateload() {
 		count = count + 20;
-		console.log(count);
 		var app = {
 			params: {
 				concurrency: count,
@@ -32,19 +32,24 @@ console.log(config.apiUrl);
 				},
 			endpoint: 'http://clipifire.com'
 		};
-		console.log(app);
 		var timeoutObject = setTimeout(function() {
-				bench.getThroughput(null, app);
+				var ldresults = bench.getThroughput(null, app);
+				//console.log(ldresults);
+				submit.points.push({ 'p': parseInt(ldresults[0][1]), 'Xp': parseInt(ldresults[1][1]) });
+				//console.log(submit);
+				//console.log(JSON.stringify(submit));
 				if (count >= 80) {
 					clearTimeout(timeoutObject);
+					bench.submit(JSON.stringify(submit),null);
 				} else {
-					iterateload();
+					iterateload(null);
 				}
 			}
 			, 2000
 		);
 	}
 	iterateload();
+	//iterateload(null);
 
 //if (app) {
 //		if (app.valid === 'true') {
