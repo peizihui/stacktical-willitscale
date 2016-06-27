@@ -1,8 +1,6 @@
-config = require('./config/config.js')();
-var bench = require('./components/stacktical-bench.js');
-
-console.log(config.apiUrl);
-
+global.__base = __dirname + '/';
+config = require(__base + 'config/config.js')();
+var bench = require(__base + 'components/stacktical-bench.js');
 
 //bench.getparams(1, function(whut) {
 //			console.log(whut);
@@ -16,40 +14,36 @@ console.log(config.apiUrl);
  * 2 loop into load testings
  * 3 format and submit the data
  */
-
-	//console.log(app);
-	//bench.getThroughput(app);
-	var submit = {'points' : []}
-	var count = 0;
-	function iterateload() {
-		count = count + 20;
+/*
 		var app = {
 			params: {
 				concurrency: count,
-				time: 1,
+				time: 10,
 				run: 2,
 				increment: 5
 				},
 			endpoint: 'http://clipifire.com'
 		};
+*/
+	var submit = {'points' : []}
+	function iterateload(err, app) {
+		app.params.concurrency = app.params.concurrency + 20;
 		var timeoutObject = setTimeout(function() {
 				var ldresults = bench.getThroughput(null, app);
-				//console.log(ldresults);
 				submit.points.push({ 'p': parseInt(ldresults[0][1]), 'Xp': parseInt(ldresults[1][1]) });
-				//console.log(submit);
-				//console.log(JSON.stringify(submit));
-				if (count >= 80) {
+				if (app.params.concurrency >= 80) {
 					clearTimeout(timeoutObject);
-					bench.submit(JSON.stringify(submit),null);
+					bench.submit(JSON.stringify(submit));
 				} else {
-					iterateload(null);
+					iterateload(null,app);
 				}
 			}
 			, 2000
 		);
 	}
-	iterateload();
-	//iterateload(null);
+
+bench.getparams(null,iterateload)
+//iterateload();
 
 //if (app) {
 //		if (app.valid === 'true') {

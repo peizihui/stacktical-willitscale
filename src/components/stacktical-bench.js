@@ -4,7 +4,7 @@
 var request = require('request');
 var lodash = require('lodash');
 
-config = require('../config/config.js')();
+config = require(__base +'config/config.js')();
 var debug = true;
 
 if (process.argv[2] && process.argv[3]) {
@@ -44,7 +44,7 @@ var app,
 // Fetch load test parameters from stacktical
 var bench = {};
 bench.getparams = function(apiKey, callback) {
-	request.get({url: '/tests/parameters'}, function(error, response, body) {
+/*	request.get({url: '/tests/parameters'}, function(error, response, body) {
 	  if (debug === true) {
 	    // For debugging
 	    console.log(body);
@@ -55,9 +55,19 @@ bench.getparams = function(apiKey, callback) {
 	    // Parse the load test parameters
 	    app = JSON.parse(body);
 	    //return app;
-	    callback(null, app);
 	  }
 	})
+	  */
+	var app = {
+			params: {
+				concurrency: 0,
+				time: 10,
+				run: 2,
+				increment: 5
+				},
+			endpoint: 'http://clipifire.com'
+		};
+	callback(null, app);
 }
 
 // Submit the load result
