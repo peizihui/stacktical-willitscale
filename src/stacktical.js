@@ -25,22 +25,22 @@ var bench = require(__base + 'components/stacktical-bench.js');
 			endpoint: 'http://clipifire.com'
 		};
 */
-	var submit = {'points' : []}
-	function iterateload(err, app) {
-		app.params.concurrency = app.params.concurrency + 20;
-		var timeoutObject = setTimeout(function() {
-				var ldresults = bench.getThroughput(null, app);
-				submit.points.push({ 'p': parseInt(ldresults[0][1]), 'Xp': parseInt(ldresults[1][1]) });
-				if (app.params.concurrency >= 80) {
-					clearTimeout(timeoutObject);
-					bench.submit(JSON.stringify(submit));
-				} else {
-					iterateload(null,app);
-				}
+var submit = {'points' : []}
+function iterateload(err, app) {
+	app.params.concurrency = app.params.concurrency + 20;
+	var timeoutObject = setTimeout(function() {
+			var ldresults = bench.getThroughput(null, app);
+			submit.points.push({ 'p': parseInt(ldresults[0][1]), 'Xp': parseInt(ldresults[1][1]) });
+			if (app.params.concurrency >= 80) {
+				clearTimeout(timeoutObject);
+				bench.submit(JSON.stringify(submit));
+			} else {
+				iterateload(null,app);
 			}
-			, 2000
-		);
-	}
+		}
+		, 2000
+	);
+}
 
 bench.getparams(null,iterateload)
 //iterateload();
@@ -59,4 +59,3 @@ bench.getparams(null,iterateload)
 //	    } else {
 //		console.error("Could not parse application info");
 //}
-

@@ -129,8 +129,6 @@ bench.getThroughput = function (err, app) {
             console.log(bufferResult);
             return bufferResult;
         }
-
 };
-
 
 module.exports = bench;
