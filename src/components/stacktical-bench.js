@@ -7,13 +7,13 @@ var lodash = require('lodash');
 config = require(__base +'config/config.js')();
 var debug = true;
 
-if (process.argv[2] && process.argv[3]) {
-	var apiKey = new Buffer(process.argv[2] + ":" + process.argv[3]).toString('base64');
+// we pass a single API key without expiration
+if (process.argv[2]) {
+	var apiKey = new Buffer(process.argv[2]).toString('base64');
 	console.log("Starting Stacktical bench image with api key: " + apiKey);
 	} else {
 	console.error("Could not read api key parameter, please provide api key as parameter of the script");
 }
-
 
 /***************
 *Fetch load testing parameters
@@ -29,22 +29,19 @@ if (process.argv[2] && process.argv[3]) {
 // Set request defaults
 var request = request.defaults({
   baseUrl: config.apiUrl,
-  headers: [
-  {
-    name :'Content-Type',
-    value: 'application/json',
-    apikey: apiKey
-  }]
+  strictSSL: false,
+  headers: {
+    'Content-Type': 'application/json';
+    'X-Access-Token': apiKey,
+  }
 })
 
-
-var app,
-    params;
+var app, params;
 
 // Fetch load test parameters from stacktical
 var bench = {};
 bench.getparams = function(apiKey, callback) {
-/*	request.get({url: '/tests/parameters'}, function(error, response, body) {
+	request.get({url: '/tests/parameters'}, function(error, response, body) {
 	  if (debug === true) {
 	    // For debugging
 	    console.log(body);
@@ -57,11 +54,11 @@ bench.getparams = function(apiKey, callback) {
 	    //return app;
 	  }
 	})
-	  */
+	
 	var app = {
 			params: {
 				concurrency: 0,
-				time: 10,
+				time: 1,
 				run: 2,
 				increment: 5
 				},
@@ -72,11 +69,10 @@ bench.getparams = function(apiKey, callback) {
 
 // Submit the load result
 // USE report stalability by using  token to verify
-bench.submit = function (results) {
-	console.log("In bench.submit" + results);
-	request.post({url: '/s/reports/scalability'}, function(error, response, body) {
+bench.submit = function (loadResults) {
+	request.post({url: '/reports/scalability', body: loadResults, json: true}, function(error, response, body) {
 	if (debug === true) {
-		console.log(body);
+		console.log(JSON.stringify(body));
 	}
 	if (error) {
 		console.error(error);
