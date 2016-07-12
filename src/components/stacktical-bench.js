@@ -9,7 +9,7 @@ var debug = true;
 
 // we pass a single API key without expiration
 if (process.argv[2]) {
-	var apiKey = new Buffer(process.argv[2]).toString('base64');
+	var apiKey = new Buffer(process.argv[2]);
 	console.log("Starting Stacktical bench image with api key: " + apiKey);
 	} else {
 	console.error("Could not read api key parameter, please provide api key as parameter of the script");
@@ -31,8 +31,8 @@ var request = request.defaults({
   baseUrl: config.apiUrl,
   strictSSL: false,
   headers: {
-    'Content-Type': 'application/json';
-    'X-Access-Token': apiKey,
+	'X-Access-Token': apiKey,
+	'content-type': 'application/json'
   }
 })
 
@@ -41,6 +41,7 @@ var app, params;
 // Fetch load test parameters from stacktical
 var bench = {};
 bench.getparams = function(apiKey, callback) {
+	
 	request.get({url: '/tests/parameters'}, function(error, response, body) {
 	  if (debug === true) {
 	    // For debugging
