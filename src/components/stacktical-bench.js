@@ -52,20 +52,10 @@ bench.getparams = function(apiKey, callback) {
 	  } else {
 	    // Parse the load test parameters
 	    app = JSON.parse(body);
-	    //return app;
+	    console.log("Received parameters for app: " + app.name);
+	    callback(null, app.parameters);
 	  }
 	})
-	
-	var app = {
-			params: {
-				concurrency: 0,
-				time: 1,
-				run: 2,
-				increment: 5
-				},
-			endpoint: 'http://clipifire.com'
-		};
-	callback(null, app);
 }
 
 // Submit the load result
@@ -83,20 +73,21 @@ bench.submit = function (loadResults) {
 	})
 }
 
-bench.getThroughput = function (err, app) {
-    console.log("Start Load testing");
+bench.getThroughput = function (err, endpoint, app) {
+    console.log("Start Load testing...");
     console.log(app);
     var result;
-    var params = app.params;
+    var params = app.parameters;
 
     var spawn = require('child_process');
 
+    var ti = params.time || 60
     var loadTest = spawn.spawnSync('siege',
     [
-        "-t" + params.time + "s",
+        "-t" + ti + "s",
         "-c"+ params.concurrency,
         "-b",
-        app.endpoint
+        endpoint
     ]);
 
     // For some reason, the transaction rate is part of stderr, not stdout
