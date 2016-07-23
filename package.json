@@ -18,5 +18,13 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Stacktical",
-  "homepage": "https://stacktical.com"
+  "homepage": "https://stacktical.com",
+  "bugs": {
+    "url": "https://github.com/Stacktical/stacktical-api/issues"
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "devDependencies": {},
+  "keywords": []
 }

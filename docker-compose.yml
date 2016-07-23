@@ -1,0 +1,5 @@
+bench:
+  build: .
+  command: echo 'ready'
+  volumes:
+    - .:/home/app/bench
