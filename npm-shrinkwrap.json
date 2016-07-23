@@ -298,6 +298,11 @@
       "from": "mkdirp@>=0.5.0 <0.6.0",
       "resolved": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.5.1.tgz"
     },
+    "mocka": {
+      "version": "0.0.1",
+      "from": "mocka@latest",
+      "resolved": "https://registry.npmjs.org/mocka/-/mocka-0.0.1.tgz"
+    },
     "ms": {
       "version": "0.7.1",
       "from": "ms@0.7.1",

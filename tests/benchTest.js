@@ -12,6 +12,7 @@ describe('bench', function() {
 			.reply(200, {
 				name: 'stacktical',
 				endpoint: 'https://stacktical.com',
+        runtime: 5,
 				parameters: [{concurrency: '5'},{concurrency: '10'}]
 			});
 		bench.getparams('1', function(callback,parameters) {
@@ -24,6 +25,7 @@ describe('bench', function() {
 	it('getTroughput() should execute the load testing', function (done) {
 		this.timeout(20000);
 		var results = bench.getThroughput(null,'http://www.clipifire.com',{
+      runtime: 2,
 			parameters:[{concurrency: '5'},{concurrency: '10'}]
 		});
 		done();

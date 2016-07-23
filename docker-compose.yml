@@ -1,5 +1,8 @@
 bench:
   build: .
-  command: echo 'ready'
+  command: node_modules/.bin/mocha --watch tests/benchTest.js
+  environment:
+    NODE_ENV: development
   volumes:
     - .:/home/app/bench
+    - /home/app/bench/node_modules

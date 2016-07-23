@@ -11,7 +11,6 @@
   "dependencies": {
     "fs": "0.0.2",
     "lodash": "^4.6.1",
-    "nock": "^8.0.0",
     "request": "^2.72.0"
   },
   "scripts": {
@@ -25,6 +24,9 @@
   "directories": {
     "test": "tests"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "mocha": "^2.5.3",
+    "nock": "https://registry.npmjs.org/nock/-/nock-8.0.0.tgz"
+  },
   "keywords": []
 }

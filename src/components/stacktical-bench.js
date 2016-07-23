@@ -81,7 +81,7 @@ bench.getThroughput = function (err, endpoint, app) {
 
     var spawn = require('child_process');
 
-    var ti = params.time || 60
+    var ti = app.runtime || 60
     var loadTest = spawn.spawnSync('siege',
     [
         "-t" + ti + "s",
