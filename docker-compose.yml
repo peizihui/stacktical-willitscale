@@ -1,5 +1,6 @@
 bench:
   build: .
+  image: stacktical/bench
   command: node_modules/.bin/mocha --watch tests/benchTest.js
   environment:
     NODE_ENV: development
