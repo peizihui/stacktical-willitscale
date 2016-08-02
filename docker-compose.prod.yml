@@ -1,5 +1,4 @@
 bench:
   build: .
-  image: stacktical/bench
   environment:
     NODE_ENV: production

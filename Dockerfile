@@ -18,4 +18,5 @@ COPY . $HOME/bench
 RUN chown -R app:app $HOME/*
 USER app
 
-CMD ["node", "src/stacktical.js", ""]
+# TODO remove apikey argument
+CMD ["node", "src/stacktical.js", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.e30.zQiHGS3o2Km9n1p60VXYSxsKa30s2F4XqT9jYdAuHv0"]
