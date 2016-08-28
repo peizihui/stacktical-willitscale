@@ -60,7 +60,7 @@ bench.getparams = function(apiKey, callback) {
 
 // Submit the load result
 // USE report stalability by using  token to verify
-bench.submit = function (loadResults) {
+bench.reportSubmit = function (loadResults) {
 	request.post({url: '/reports/scalability', body: loadResults, json: true}, function(error, response, body) {
 	if (debug === true) {
 		console.log(JSON.stringify(body));
@@ -69,6 +69,21 @@ bench.submit = function (loadResults) {
 		console.error(error);
 	} else {
 		console.log("Successfully sumitted load test results to stacktical. Exiting...");
+	}
+	})
+}
+
+// Submit a single load test result
+// TODO Adjust according th the API specs
+bench.loadSubmit = function(loadResult) {
+	request.post({url: '/reports/test', body: loadResult, json: true}, function(error, response, body) {
+	if (debug === true) {
+		console.log(JSON.stringify(body));
+	}
+	if (error) {
+		console.error(error);
+	} else {
+		console.log("Successfully sumitted test result unit to stacktical.");
 	}
 	})
 }
