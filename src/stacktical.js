@@ -23,7 +23,7 @@ function iterateload(err, app) {
 			} else {
 				iterateload(null,app);
 			}*/
-			// TODO Submit the single load test result
+		// TODO Submit the single load test result
 			// This operation is not critical
 			bench.loadSubmit(p, Xp);
 			for (var loadTest in app) {
@@ -37,4 +37,4 @@ function iterateload(err, app) {
 }
 
 // Start with load test parameters acquisition
-bench.getparams(null,iterateload);
+bench.getParams(null,iterateload);

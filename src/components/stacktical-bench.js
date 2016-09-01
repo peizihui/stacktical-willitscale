@@ -8,23 +8,13 @@ config = require(__base +'config/config.js')();
 var debug = true;
 
 // we pass a single API key without expiration
-if (process.argv[2]) {
+if (process.argv[2] && process.argv[3]) {
 	var apiKey = new Buffer(process.argv[2]);
-	console.log("Starting Stacktical bench image with api key: " + apiKey);
+	var appId = new Buffer(process.argv[3]);
+	console.log("Starting Stacktical bench image with api key: " + apiKey + " applicationID: " + appId);
 	} else {
 	console.error("Could not read api key parameter, please provide api key as parameter of the script");
 }
-
-/***************
-*Fetch load testing parameters
-*GET /tests/{apiKey}/parameters
-*
-*Run the test load
-*POST /tests/loop
-*
-*Submit the load results
-*POST /reports/scalability
-****************/
 
 // Set request defaults
 var request = request.defaults({
@@ -36,12 +26,28 @@ var request = request.defaults({
   }
 })
 
-var app, params;
+var app, params, testId;
+var bench = {};
+
+// Create a new test
+bench.getTest = function(apiKey, callback) {
+  request.post({url: 'tests', headers: {'x-key': appId}, json: true}, function(error, response, body) {
+	if (debug === true) {
+		console.log(JSON.stringify(body));
+	}
+	if (error) {
+		console.error(error);
+	} else {
+    testId = JSON.parse(body);
+    testId = testID.testid;
+    console.log("Created new test...");
+    callback(null, testId)
+	}
+	})
+}
 
 // Fetch load test parameters from stacktical
-var bench = {};
-bench.getparams = function(apiKey, callback) {
-	
+bench.getParams = function(apiKey, callback) {
 	request.get({url: '/tests/parameters'}, function(error, response, body) {
 	  if (debug === true) {
 	    // For debugging
@@ -58,25 +64,10 @@ bench.getparams = function(apiKey, callback) {
 	})
 }
 
-// Submit the load result
-// USE report stalability by using  token to verify
-bench.reportSubmit = function (loadResults) {
-	request.post({url: '/reports/scalability', body: loadResults, json: true}, function(error, response, body) {
-	if (debug === true) {
-		console.log(JSON.stringify(body));
-	}
-	if (error) {
-		console.error(error);
-	} else {
-		console.log("Successfully sumitted load test results to stacktical. Exiting...");
-	}
-	})
-}
-
 // Submit a single load test result
 // TODO Adjust according th the API specs
-bench.loadSubmit = function(loadResult) {
-	request.post({url: '/reports/test', body: loadResult, json: true}, function(error, response, body) {
+bench.loadSubmit = function(testId, loadResult) {
+	request.post({url: '/tests/' + testId, body: loadResult, json: true}, function(error, response, body) {
 	if (debug === true) {
 		console.log(JSON.stringify(body));
 	}
@@ -84,6 +75,22 @@ bench.loadSubmit = function(loadResult) {
 		console.error(error);
 	} else {
 		console.log("Successfully sumitted test result unit to stacktical.");
+	}
+	})
+}
+
+
+// Submit the load result
+// USE report stalability by using  token to verify
+bench.reportSubmit = function (loadResults) {
+  request.post({url: '/reports/scalability', body: loadResults, json: true}, function(error, response, body) {
+	if (debug === true) {
+		console.log(JSON.stringify(body));
+	}
+	if (error) {
+		console.error(error);
+	} else {
+		console.log("Successfully sumitted load test results to stacktical. Exiting...");
 	}
 	})
 }

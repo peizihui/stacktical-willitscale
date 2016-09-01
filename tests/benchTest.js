@@ -1,7 +1,5 @@
 var nock = require('nock');
 global.__base = '../';
-//config = require('../src/config/config.js')();
-//require('../src/stacktical.js');
 var bench = require('../src/components/stacktical-bench.js');
 
 console.log(config);
@@ -12,10 +10,10 @@ describe('bench', function() {
 			.reply(200, {
 				name: 'stacktical',
 				endpoint: 'https://stacktical.com',
-				runtime: 5,
+        runtime: 5,
 				parameters: [{concurrency: '5'},{concurrency: '10'}]
 			});
-		bench.getparams('1', function(callback,parameters) {
+		bench.getParams('1', function(callback,parameters) {
 			// Some checks
 			console.log(parameters);
 			done();
@@ -24,27 +22,27 @@ describe('bench', function() {
 	
 	it('getTroughput() should execute the load testing', function (done) {
 		this.timeout(20000);
-		var results = bench.getThroughput(null,'https://stacktical.com',{
+		var results = bench.getThroughput(null,'http://www.clipifire.com',{
       runtime: 2,
 			parameters:[{concurrency: '5'},{concurrency: '10'}]
 		});
 		done();
 	});
 
-	// TODO adjust url according to API specs
-	it('loadSubmit() shoudl return 200 on a single load testing submit', function (done) {
+	it('submit() should send load testing result', function (done) {
 		nock(config.apiUrl)
-			.post('/reports/test')
-			reply(200,
+			.post('/tests/1')
+			.reply(200,
 				{"status":200,"error":false,"report":{}}
 			);
 		bench.loadSubmit(
-			// Single load test sample
+			1,
+      {"p":5,"Xp":27.09}
 		);
 		done();
 	});
 
-	it('reportSubmit() should return load testing result', function (done) {
+	it('reportSubmit() should send load testing result', function (done) {
 		nock(config.apiUrl)
 			.post('/reports/scalability')
 			.reply(200,
