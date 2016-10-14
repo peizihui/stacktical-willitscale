@@ -3,9 +3,10 @@ config = require(__base + 'config/config.js')();
 var bench = require(__base + 'components/stacktical-bench.js');
 
 /*
- * 1 acquire params
- * 2 loop into load testings
- * 3 format and submit the data
+ * 1 [GET] /tests/parameters acquire params
+ * 2 [POST] /tests
+ * 3 [POST] /tests/:testId submit each test iteration results
+ * 4 [POST] /reports/scalability format and submit the data
  */
 
 var loadResults = {'points' : []};

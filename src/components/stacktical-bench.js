@@ -14,6 +14,7 @@ if (process.argv[2] && process.argv[3]) {
 	console.log("Starting Stacktical bench image with api key: " + apiKey + " applicationID: " + appId);
 	} else {
 	console.error("Could not read api key parameter, please provide api key as parameter of the script");
+  var testId;
 }
 
 // Set request defaults
