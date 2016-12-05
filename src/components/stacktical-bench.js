@@ -7,75 +7,75 @@ var lodash = require('lodash');
 config = require(__base +'config/config.js')();
 var debug = true;
 
-// we pass a single API key without expiration
+// Set apiKey and appId paramaters
 if (process.argv[2] && process.argv[3]) {
 	var apiKey = new Buffer(process.argv[2]);
 	var appId = new Buffer(process.argv[3]);
 	console.log("Starting Stacktical bench image with api key: " + apiKey + " applicationID: " + appId);
 	} else {
-	console.error("Could not read api key parameter, please provide api key as parameter of the script");
-  var testId;
+	console.error("Could not read api key and application ID as, please provide api key as parameter of the script");
 }
 
-// Set request defaults
+// Set request defaults. All request contains the apiKey
+// TODO disable strictSSL only in debugmode
 var request = request.defaults({
   baseUrl: config.apiUrl,
   strictSSL: false,
   headers: {
-	'X-Access-Token': apiKey,
+	'Authorization': apiKey,
 	'content-type': 'application/json'
   }
 })
 
-var app, params, testId;
+var params = [];
 var bench = {};
+var app = {};
+var test = {};
 
 // Create a new test
-bench.getTest = function(apiKey, callback) {
-  request.post({url: 'tests', headers: {'x-key': appId}, json: true}, function(error, response, body) {
-	if (debug === true) {
-		console.log(JSON.stringify(body));
-	}
-	if (error) {
-		console.error(error);
-	} else {
-    testId = JSON.parse(body);
-    testId = testID.testid;
-    console.log("Created new test...");
-    callback(null, testId)
-	}
-	})
+bench.createTest = function(apiKey, callback) {
+  request.post({url: 'tests', headers: {'x-application': appId}, json: true}, function(error, response, body) {
+    if (debug === true) {
+      console.log(JSON.stringify(body));
+    }
+    if (error) {
+      console.error(error);
+    } else {
+      test.id = JSON.parse(body).testId;
+      console.log("Created new test...");
+      callback(null, iterateload)
+    }
+  })
 }
 
 // Fetch load test parameters from stacktical
 bench.getParams = function(apiKey, callback) {
 	request.get({url: '/tests/parameters'}, function(error, response, body) {
 	  if (debug === true) {
-	    // For debugging
 	    console.log(body);
 	  }
 	  if (error) {
 	    console.error(error);
 	  } else {
 	    // Parse the load test parameters
-	    app = JSON.parse(body);
+	    params = JSON.parse(body);
 	    console.log("Received parameters for app: " + app.name);
-	    callback(null, app.parameters);
+	    callback(null, app, params);
 	  }
 	})
 }
 
 // Submit a single load test result
 // TODO Adjust according th the API specs
-bench.loadSubmit = function(testId, loadResult) {
-	request.post({url: '/tests/' + testId, body: loadResult, json: true}, function(error, response, body) {
+bench.loadSubmit = function(test, loadResult) {
+	request.post({url: '/tests/' + test.id, body: loadResult, json: true}, function(error, response, body) {
 	if (debug === true) {
 		console.log(JSON.stringify(body));
 	}
 	if (error) {
 		console.error(error);
 	} else {
-		console.log("Successfully sumitted test result unit to stacktical.");
+		console.log("Successfully submitted the test result unit to stacktical.");
 	}
 	})
 }
@@ -96,19 +96,17 @@ bench.reportSubmit = function (loadResults) {
 	})
 }
 
-bench.getThroughput = function (err, endpoint, app) {
+bench.getThroughput = function (err, endpoint, concurrency, time) {
     console.log("Start Load testing...");
-    console.log(app);
     var result;
-    var params = app.parameters;
 
     var spawn = require('child_process');
 
-    var ti = app.runtime || 60
+    var ti = time || 60
     var loadTest = spawn.spawnSync('siege',
     [
         "-t" + ti + "s",
-        "-c"+ params.concurrency,
+        "-c"+ concurrency,
         "-b",
         endpoint
     ]);
