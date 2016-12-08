@@ -13,8 +13,8 @@ var loadResults = {'points' : []};
 function iterateload(err, app, params) {
 	console.log(params);
 	// TODO loop through params
-	for i in params {
-		var concurrency = app.params.concurrency + 20;
+	for (var i = 0, len = param.length; i < len; i++) {
+		var concurrency = app.params[i].concurrency + 20;
 		var timeoutObject = setTimeout(function() {
 				var ldresults = bench.getThroughput(null, app);
 				var p = parseInt(ldresults[0][1]);
@@ -42,4 +42,4 @@ function iterateload(err, app, params) {
 }
 
 // Start
-bench.createTest(null, getParams);
+bench.createTest(null, bench.getParams);

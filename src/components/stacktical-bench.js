@@ -5,7 +5,6 @@ var request = require('request');
 var lodash = require('lodash');
 
 config = require(__base +'config/config.js')();
-var debug = true;
 
 // Set apiKey and appId paramaters
 if (process.argv[2] && process.argv[3]) {
@@ -22,8 +21,9 @@ var request = request.defaults({
   baseUrl: config.apiUrl,
   strictSSL: false,
   headers: {
-	'Authorization': apiKey,
-	'content-type': 'application/json'
+	'Authorization': 'Bearer ' + apiKey,
+	'content-type': 'application/json',
+    'x-application': appId
   }
 })
 
@@ -34,33 +34,35 @@ var test = {};
 
 // Create a new test
 bench.createTest = function(apiKey, callback) {
-  request.post({url: 'tests', headers: {'x-application': appId}, json: true}, function(error, response, body) {
-    if (debug === true) {
-      console.log(JSON.stringify(body));
-    }
-    if (error) {
-      console.error(error);
-    } else {
-      test.id = JSON.parse(body).testId;
-      console.log("Created new test...");
-      callback(null, iterateload)
-    }
-  })
+    console.log('Initiating new Test')
+    request.post({url: 'tests', json: true}, function(error, response, body) {
+        if (config.debug === true) {
+            console.log(JSON.stringify(body));
+        }
+        if (error) {
+            console.error(error);
+        } else {
+            test.id = JSON.stringify(body).testId;
+            console.log("Created new test...");
+            callback(null, callback)
+        }
+    })
 }
 
 // Fetch load test parameters from stacktical
 bench.getParams = function(apiKey, callback) {
+    console.log('Initiating getParams')
 	request.get({url: '/tests/parameters'}, function(error, response, body) {
-	  if (debug === true) {
+	  if (config.debug === true) {
 	    console.log(body);
 	  }
 	  if (error) {
 	    console.error(error);
 	  } else {
 	    // Parse the load test parameters
-	    params = JSON.parse(body);
+	    params = JSON.stringify(body);
 	    console.log("Received parameters for app: " + app.name);
-	    callback(null, app, params);
+	    //callback(null, app, params);
 	  }
 	})
 }
@@ -69,7 +71,7 @@ bench.getParams = function(apiKey, callback) {
 // TODO Adjust according th the API specs
 bench.loadSubmit = function(test, loadResult) {
 	request.post({url: '/tests/' + test.id, body: loadResult, json: true}, function(error, response, body) {
-	if (debug === true) {
+	if (config.debug === true) {
 		console.log(JSON.stringify(body));
 	}
 	if (error) {
@@ -85,7 +87,7 @@ bench.loadSubmit = function(test, loadResult) {
 // USE report stalability by using  token to verify
 bench.reportSubmit = function (loadResults) {
   request.post({url: '/reports/scalability', body: loadResults, json: true}, function(error, response, body) {
-	if (debug === true) {
+	if (config.debug === true) {
 		console.log(JSON.stringify(body));
 	}
 	if (error) {
