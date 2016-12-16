@@ -14,7 +14,8 @@
     *************/
 
     module.exports = {
-        createTest: createTest
+        createTest: createTest,
+        getParams: getParams
     };
 
     /*****************
@@ -22,10 +23,10 @@
     *****************/
 
     /**
-     * Retrieve streamer information
+     * Create a new Test
      *
-     * @param {string} streamerId The id of the streamer we're getting information about
-     * @param {string} genyId The uuid of the authenticated user
+     * @param {string} x-application A unique identifier for the authenticated application.
+     * @param {string} apiKey The non-expired, valid access token of the authenticated user or a valid application API key.
      * @return {Promise} Promise The returned promise object
      */
     function createTest(appId, apiKey) {
@@ -43,4 +44,37 @@
                 logger.info('Creating test object...');
             });
     }
+
+    function getParams(appId, apiKey) {
+    var getParamsOptions = {
+            uri: util.format('%s/v1/tests/parameters', 'https://stacktical.com/api'),
+            headers: {
+                x-application: appId,
+                Authorization: 'Bearer ' + apiKey
+            },
+            json: true
+        };
+
+        return requestP(getParamsOptions)
+                .finally(function() {
+                    logger.info('Getting test parameters...');
+                });
+    }
+
+    function loadSubmit(appId, apiKey, testId, loadesult) {
+    var loadSubmitOptions = {
+        method: 'POST',
+            uri: util.format('%s/v1/tests/' + testId, 'https://stacktical.com/api'),
+        body: loadresult,
+        json: true
+    };
+
+        return requestP(loadSubmitOptions)
+                .finally(function() {
+                    logger.info('Submitting load test result...');
+                });
+
+    }
+
+
 })();

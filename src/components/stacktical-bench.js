@@ -17,18 +17,6 @@ if (process.argv[2] && process.argv[3]) {
 	console.error("Could not read api key and application ID as, please provide api key as parameter of the script");
 }
 
-// Set request defaults. All request contains the apiKey
-// TODO disable strictSSL only in debugmode
-var request = request.defaults({
-  baseUrl: config.apiUrl,
-  strictSSL: false,
-  headers: {
-	'Authorization': 'Bearer ' + apiKey,
-	'content-type': 'application/json',
-    'x-application': appId
-  }
-})
-
 var params = {};
 var bench = {};
 var app = {};
