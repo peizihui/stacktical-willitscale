@@ -1,7 +1,7 @@
-FROM node:4.4
+FROM node:7.2.1
 
 RUN useradd --user-group --create-home --shell /bin/false app &&\
-  npm install --global npm@3.10.5 &&\
+  npm install --global npm@3.10.8 &&\
   apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
 # Run latest siege
@@ -17,7 +17,7 @@ COPY package.json npm-shrinkwrap.json $HOME/bench/
 RUN chown -R app:app $HOME/*
 
 USER app
-WORKDIR $HOME/bench 
+WORKDIR $HOME/bench
 RUN npm install &&\
   npm cache clean
 

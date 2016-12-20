@@ -1,5 +1,7 @@
 global.__base = __dirname + '/';
 config = require(__base + 'config/config.js')();
+
+var logger = require(__base + 'logger/logger.winston')(module);
 var Promise = require("bluebird");
 var bench = require(__base + 'components/benchmark/benchmark.controller');
 var reports = require(__base + 'components/reports/reports.controller');
@@ -15,27 +17,34 @@ var reports = require(__base + 'components/reports/reports.controller');
 if (process.argv[2] && process.argv[3]) {
     var apiKey = new Buffer(process.argv[2]);
     var appId = new Buffer(process.argv[3]);
-    console.log("Starting Stacktical bench image with api key: " + apiKey + " applicationID: " + appId);
+    logger.info("Starting Stacktical bench image with api key: " + apiKey + " applicationID: " + appId);
     } else {
-    console.error("Could not read api key and application ID as, please provide api key as parameter of the script");
+    logger.error("Could not read api key and application ID as, please provide api key as parameter of the script");
 };
 
-// Start
-function stacktical() {
-    // Initiates a new test
-    bench.createTest(appId, apiKey)
-    .then(function() {
-    // Acquires application test parameters
-        bench.getParams(appId, apiKey)
-        .then(function(application) {
-            console.log(application);
+var testId;
+
+// Initiates a new test
+bench.createTest(appId, apiKey)
+.then(function(response) {
+//store testid in a function
+// Acquires application test parameters
+//This below is in another then a level 1
+    logger.info(response);
+    testId = response.testId
+})
+.then(function() {
+    bench.getParams(appId, apiKey)
+    .then(function(response) {
+        logger.info(response);
         var loadResults = {'points' : []};
+        var application = response.params.application
         // Loop through the test parameters and run them
-        for (var i in application.params.parameters) {
+        for (var i in response.params.parameters) {
             var timeoutObject = setTimeout(function() {
-            var concurrency = application.params.parameters[i].concurrency;
-        // Runs a single test
-            bench.getThroughput(application.endpoint, concurrency, 15)
+            var concurrency = response.params.parameters[i].concurrency;
+            // Runs a single test
+            bench.getThroughput(application.endpoint, concurrency, 16)
                 .then(function(ldresults) {
                 var p = parseInt(ldresults[0][1]);
                 var Xp = parseInt(ldresults[1][1]);
@@ -45,21 +54,17 @@ function stacktical() {
                 for (var loadTest in app) {
                     iterateload(null,loadTest);
                 }
-                console.log(submit);
+                logger.info(submit);
 
                 });
                clearTimeout(timeoutObject);
             },2000);
         }
-        // TODO Can do .then after a for loop?
-        .then(function(loadResults) {
-        bench.reportSubmit(submit).catch(function(reason) {
-                console.log('Unable to submit this load test results :' + reason);
-            });
-        });
-        });
-
     })
-};
-
-stacktical();
+    // TODO Can do .then after a for loop?
+    .then(function(loadResults) {
+        bench.reportSubmit(submit).catch(function(reason) {
+                logger.info('Unable to submit this load test results :' + reason);
+        });
+    })
+})
