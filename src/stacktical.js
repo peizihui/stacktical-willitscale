@@ -25,7 +25,7 @@ if (process.argv[2] && process.argv[3]) {
 var testId;
 
 // Initiates a new test
-bench.createTest(appId, apiKey)
+bench.createTest(apiKey, appId)
 .then(function(response) {
 //store testid in a function
 // Acquires application test parameters
@@ -34,7 +34,7 @@ bench.createTest(appId, apiKey)
     testId = response.testId
 })
 .then(function() {
-    bench.getParams(appId, apiKey)
+    bench.getParams(apiKey, appId)
     .then(function(response) {
         logger.info(response);
         var loadResults = {'points' : []};

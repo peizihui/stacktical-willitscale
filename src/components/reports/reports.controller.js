@@ -33,7 +33,7 @@
             body: loadResults,
             json: true
         };
-	}
-
     }
+
+
 })();
