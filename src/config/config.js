@@ -3,7 +3,7 @@ module.exports = function() {
     var debug = true;
     if (debug === true) {
         return {
-            apiUrl : 'https://0.0.0.0:10003/v1/',
+            apiUrl : 'https://localhost:10003',
             debug : debug
         };
     } else {
