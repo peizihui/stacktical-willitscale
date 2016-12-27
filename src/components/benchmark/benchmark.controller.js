@@ -96,7 +96,7 @@
     };
 
     function getThroughput(endpoint, concurrency, time) {
-        console.log("Start Load testing...");
+        console.log("Start Load testing against " + endpoint + " with cc of " + concurrency);
 
         return new Promise(function(resolve, reject) {
             var result;

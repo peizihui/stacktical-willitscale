@@ -23,7 +23,7 @@ if (process.argv[2] && process.argv[3]) {
 };
 
 var testId;
-var submit = {"points":[{"p":5,"Xp":27.09},{"p":10,"Xp":43.41},{"p":15,"Xp":55},{"p":20,"Xp":62.06},{"p":25,"Xp":69.3},{"p":30,"Xp":74.63},{"p":35,"Xp":78.07},{"p":40,"Xp":80.05}]};
+var devSubmit = {"points":[{"p":5,"Xp":27.09},{"p":10,"Xp":43.41},{"p":15,"Xp":55},{"p":20,"Xp":62.06},{"p":25,"Xp":69.3},{"p":30,"Xp":74.63},{"p":35,"Xp":78.07},{"p":40,"Xp":80.05}]};
 
 // Initiates a new test
 bench.createTest(apiKey, appId)
@@ -46,7 +46,7 @@ bench.createTest(apiKey, appId)
             var timeoutObject = setTimeout(function() {
             var concurrency = application.parameters[i].concurrency;
             // Runs a single test
-            bench.getThroughput(application.endpoint, concurrency, 16)
+            bench.getThroughput(application.url, concurrency, 16)
                 .then(function(ldresults) {
                     var p = parseInt(ldresults[0][1]);
                     var Xp = parseInt(ldresults[1][1]);
