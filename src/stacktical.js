@@ -26,44 +26,54 @@ var testId;
 var devSubmit = {"points":[{"p":5,"Xp":27.09},{"p":10,"Xp":43.41},{"p":15,"Xp":55},{"p":20,"Xp":62.06},{"p":25,"Xp":69.3},{"p":30,"Xp":74.63},{"p":35,"Xp":78.07},{"p":40,"Xp":80.05}]};
 
 // Initiates a new test
+// 1 [POST] /tests Initiate a new test
 bench.createTest(apiKey, appId)
-.then(function(response) {
-//store testid in a function
-// Acquires application test parameters
-//This below is in another then a level 1
-    logger.info(response);
-    testId = response.testId
+.then(function(test) {
+    testId = test.testId
+     // 2 [GET] /tests/parameters Acquire application test parameters
+    return bench.getParams(apiKey, appId)
 })
-.then(function() {
-    bench.getParams(apiKey, appId)
-    .then(function(response) {
-        logger.info(response);
-        var loadResults = {'points' : []};
-        var application = response.application;
-        logger.info(application.parameters);
-        // Loop through the test parameters and run them
-        for (var i in application.parameters) {
+.catch(function(reason) {
+    // Catch bench.createTest
+    logger.error(reason);
+})
+.then(function(testParameters) {
+    var loadResults = {'points' : []};
+    var application = testParameters.application;
+    //logger.info(application.parameters);
+    // Loop through the test parameters and run them
+    for (var i in application.parameters) {
 //            var timeoutObject = setTimeout(function() {
-            var concurrency = application.parameters[i].concurrency;
-            // Runs a single test
-            bench.getThroughput(application.url, concurrency, 16)
-                .then(function(ldresults) {
-                    var p = parseInt(ldresults[0][1]);
-                    var Xp = parseInt(ldresults[1][1]);
-                    loadResults.points.push({ 'p': p, 'Xp': Xp });
-                    bench.loadSubmit(apiKey, appId, testId, { 'p': p, 'Xp': Xp });
-                });
- //              clearTimeout(timeoutObject);
-//            },2000);
-        }
-    })
-    .then(function(loadResults) {
-        bench.testSubmit(apiKey, appId, devSubmit)
-            .then(function() {
-                logger.info("scalability test complete");
+        var concurrency = application.parameters[i].concurrency;
+        // Runs a single test
+        bench.getThroughput(application.url, concurrency, 16)
+            .then(function(ldresults) {
+                var p = parseInt(ldresults[0][1]);
+                var Xp = parseInt(ldresults[1][1]);
+                loadResults.points.push({ 'p': p, 'Xp': Xp });
+                // 3 [POST] /tests/:testId Submit each test iteration results
+                bench.loadSubmit(apiKey, appId, testId, { 'p': p, 'Xp': Xp });
             })
             .catch(function(reason) {
-                logger.info('Unable to submit this load test results :' + reason);
+                // Catch bench.createTest
+                logger.error(reason);
             });
-    });
+//              clearTimeout(timeoutObject);
+//            },2000);
+    }
 })
+.catch(function(reason) {
+    // Catch bench.createTest
+    logger.error(reason);
+})
+.then(function(loadResults) {
+
+    // 4 [POST] /reports/scalability format and submit the data for a scalability report
+    bench.testSubmit(apiKey, appId, devSubmit)
+        .then(function() {
+            logger.info("scalability test complete");
+        })
+        .catch(function(reason) {
+            logger.info('Unable to submit this load test results :' + reason);
+        });
+});

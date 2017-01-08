@@ -53,7 +53,6 @@
             }
         };
 
-        logger.info(createTestOptions);
         return baseRequestP(createTestOptions)
             .finally(function() {
                 logger.info('Creating test object...');
@@ -70,7 +69,6 @@
             }
         };
 
-        logger.info(getParamsOptions);
         return baseRequestP(getParamsOptions)
                 .finally(function() {
                     logger.info('Getting test parameters...');
@@ -89,17 +87,16 @@
             }
         };
 
-        logger.info(loadSubmitOptions);
         return baseRequestP(loadSubmitOptions)
                 .finally(function() {
-                    logger.info('Submitting load test result...');
+                    logger.info('Submitting single load test result...');
                 });
     };
 
     function testSubmit(apiKey, appId, loadresults) {
         var loadSubmitOptions = {
             method: 'POST',
-            uri: util.format('%s/v1/scalability/report/', config.apiUrl),
+            uri: util.format('%s/v1/reports/scalability', config.apiUrl),
             body: loadresults,
             headers: {
                     'Content-type': 'application/json',
@@ -108,10 +105,9 @@
             }
         };
 
-        logger.info(loadSubmitOptions);
         return baseRequestP(loadSubmitOptions)
                 .finally(function() {
-                    logger.info('Submitting load test result...');
+                    logger.info('Submitting load tests...');
                 });
     };
 
@@ -163,6 +159,5 @@
                 };
         });
     }
-
 
 })();
