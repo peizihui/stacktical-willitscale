@@ -43,7 +43,7 @@ bench.createTest(apiKey, appId)
         logger.info(application.parameters);
         // Loop through the test parameters and run them
         for (var i in application.parameters) {
-            var timeoutObject = setTimeout(function() {
+//            var timeoutObject = setTimeout(function() {
             var concurrency = application.parameters[i].concurrency;
             // Runs a single test
             bench.getThroughput(application.url, concurrency, 16)
@@ -53,17 +53,17 @@ bench.createTest(apiKey, appId)
                     loadResults.points.push({ 'p': p, 'Xp': Xp });
                     bench.loadSubmit(apiKey, appId, testId, { 'p': p, 'Xp': Xp });
                 });
-               clearTimeout(timeoutObject);
-            },2000);
+ //              clearTimeout(timeoutObject);
+//            },2000);
         }
     })
-//    .then(function(loadResults) {
-//        bench.reportSubmit(apiKey, appId, submit)
-//            .then(function() {
-//                logger.info("scalability test complete");
-//            })
-//            .catch(function(reason) {
-//                logger.info('Unable to submit this load test results :' + reason);
-//            });
-//    });
+    .then(function(loadResults) {
+        bench.testSubmit(apiKey, appId, devSubmit)
+            .then(function() {
+                logger.info("scalability test complete");
+            })
+            .catch(function(reason) {
+                logger.info('Unable to submit this load test results :' + reason);
+            });
+    });
 })

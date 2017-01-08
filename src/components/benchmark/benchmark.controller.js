@@ -21,7 +21,8 @@
         createTest: createTest,
         getParams: getParams,
         getThroughput: getThroughput,
-        loadSubmit: loadSubmit
+        loadSubmit: loadSubmit,
+        testSubmit: testSubmit
     };
 
     /*****************
@@ -81,6 +82,25 @@
             method: 'POST',
             uri: util.format('%s/v1/tests/' + testId, config.apiUrl),
             body: loadresult,
+            headers: {
+                    'Content-type': 'application/json',
+                    'x-application': appId + '',
+                    'Authorization': 'Bearer: ' + apiKey
+            }
+        };
+
+        logger.info(loadSubmitOptions);
+        return baseRequestP(loadSubmitOptions)
+                .finally(function() {
+                    logger.info('Submitting load test result...');
+                });
+    };
+
+    function testSubmit(apiKey, appId, loadresults) {
+        var loadSubmitOptions = {
+            method: 'POST',
+            uri: util.format('%s/v1/scalability/report/', config.apiUrl),
+            body: loadresults,
             headers: {
                     'Content-type': 'application/json',
                     'x-application': appId + '',
