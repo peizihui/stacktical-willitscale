@@ -27,4 +27,4 @@ RUN chown -R app:app $HOME/*
 USER app
 
 # TODO remove apikey argument
-CMD ["node", "src/stacktical.js", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.e30.zQiHGS3o2Km9n1p60VXYSxsKa30s2F4XqT9jYdAuHv0"]
+CMD ["node", "src/stacktical.js",  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiYzNiZWQwOC0wMjM3LTRmY2EtOTc5NC1iZDQ2NzNiMjRiZWUiLCJqdGkiOiI2MGJhMGRhYy1hZWQ3LTRkYzAtODE1Yi04YmU5OTc5ZTcyOTciLCJjbGllbnQiOnsidHlwZSI6ImFwcGxpY2F0aW9uIn0sInNjb3BlcyI6WyJ0ZXN0cyIsInJlcG9ydHMiXX0.tfOdvARi4qpbQVAD9o0R9i61LVXgfJzqDLueoGn78Ks", "bc3bed08-0237-4fca-9794-bd4673b24bee"]
