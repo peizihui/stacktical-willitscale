@@ -16,9 +16,9 @@
     "winston-syslog": "^1.2.5"
   },
   "scripts": {
-    "pretest": "rm -rf ./tests/reports/coverage",
-    "test": "istanbul cover _mocha ./tests",
-    "posttest": "istanbul report html --root ./tests/reports/coverage --dir ./tests/reports/coverage",
+    "pretest": "rm -rf ./tests/reports/ut ./tests/reports/coverage",
+    "test": "istanbul cover _mocha ./tests -- --opts ./tests/mocha.opts",
+    "posttest": "istanbul report html --dir ./tests/reports/coverage",
     "lint": "eslint src tests",
     "precheckstyle": "mkdir -p ./tests/reports/lint/",
     "checkstyle": "eslint -f checkstyle src tests > ./tests/reports/lint/report.xml"

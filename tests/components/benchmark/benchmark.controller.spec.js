@@ -1,5 +1,4 @@
 var nock = require('nock');
-global.__base = '../';
 var bench = require(__base + 'components/benchmark/benchmark.controller.js');
 
 describe('bench', function() {
