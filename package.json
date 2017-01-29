@@ -16,15 +16,32 @@
     "winston-syslog": "^1.2.5"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "pretest": "rm -rf ./tests/reports/ut ./tests/reports/coverage",
+    "test": "istanbul cover _mocha ./tests -- --opts ./tests/mocha.opts",
+    "posttest": "istanbul report html --dir ./tests/reports/coverage",
+    "lint": "eslint src tests",
+    "precheckstyle": "mkdir -p ./tests/reports/lint/",
+    "checkstyle": "eslint -f checkstyle src tests > ./tests/reports/lint/report.xml"
   },
   "author": "Stacktical, Inc",
   "homepage": "https://stacktical.com",
-  "directories": {
-    "test": "tests"
-  },
   "devDependencies": {
-    "mocha": "^2.5.3",
-    "nock": "https://registry.npmjs.org/nock/-/nock-8.0.0.tgz"
+    "babel-eslint": "^7.1.1",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^6.0.0",
+    "chai-date-string": "^0.1.0",
+    "chai-json-schema": "^1.4.0",
+    "eslint": "^3.14.1",
+    "eslint-config-google": "^0.7.1",
+    "eslint-plugin-node": "^3.0.5",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.2.0",
+    "mocha-multi": "^0.10.0",
+    "mochawesome": "^2.0.2",
+    "nock": "^9.0.2",
+    "sinon": "^1.17.7",
+    "sinon-chai": "^2.8.0",
+    "supertest": "^2.0.1",
+    "uuid": "^3.0.1"
   }
 }
