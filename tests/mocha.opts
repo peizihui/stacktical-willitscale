@@ -1,0 +1,4 @@
+--recursive
+--reporter mochawesome
+--reporter-options reportDir=./tests/reports/mocha,inlineAssets=true
+--timeout 5000
