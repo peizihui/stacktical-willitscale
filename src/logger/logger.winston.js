@@ -32,6 +32,13 @@ module.exports = function(loggerModule) {
                 formatter: formatterVerbose,
                 json: true,
                 colorize: true
+            }),
+            new winston.transports.Syslog({
+                level: 'debug',
+                protocol: 'unix',
+                path: (os.platform() === 'darwin' ? '/var/run/syslog' : '/dev/log'),
+                facility: 'local0',
+                formatter: formatterVerboseNoDate
             })
         ],
         exitOnError: false
