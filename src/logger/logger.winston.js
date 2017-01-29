@@ -1,4 +1,3 @@
-var os = require('os');
 var winston = require('winston');
 var moment = require('moment');
 var util = require('util');
@@ -17,14 +16,6 @@ module.exports = function(loggerModule) {
         return util.format('[%s][%s][PID:%s][%s]: %s', level, date, pid, filepath, args.message);
     };
 
-    var formatterVerboseNoDate = function(args) {
-        var pid = process.pid;
-        var level = args.level.toUpperCase();
-        var filepath = loggerModule.filename;
-
-        return util.format('[%s][PID:%s][%s]: %s', level, pid, filepath, args.message);
-    };
-
     var logger = new winston.Logger({
         transports: [
             new winston.transports.Console({
@@ -32,13 +23,6 @@ module.exports = function(loggerModule) {
                 formatter: formatterVerbose,
                 json: true,
                 colorize: true
-            }),
-            new winston.transports.Syslog({
-                level: 'debug',
-                protocol: 'unix',
-                path: (os.platform() === 'darwin' ? '/var/run/syslog' : '/dev/log'),
-                facility: 'local0',
-                formatter: formatterVerboseNoDate
             })
         ],
         exitOnError: false
