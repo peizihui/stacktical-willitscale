@@ -3,3 +3,4 @@ node_modules
 public/src/dist
 *.swp
 dist/*
+npm-debug.log
