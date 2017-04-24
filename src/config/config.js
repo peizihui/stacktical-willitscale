@@ -1,14 +1,26 @@
 module.exports = function() {
 
-    var debug = true;
-    if (debug === true) {
+    var debug;
+    var apiEnv = process.env.STACKTICAL_API_ENV;
+
+    switch (process.env.STACKTICAL_API_ENV)
+    {
+    case "dev":
         return {
             apiUrl : 'https://localhost:10003',
             debug : debug
         };
-    } else {
+    break;
+    case "staging":
+        return {
+            apiUrl : 'https://staging.stacktical.com/api/v1/'
+
+        };
+    break;
+    default:
         return {
             apiUrl : 'https://stacktical.com/api/v1/'
+
         };
     }
 }

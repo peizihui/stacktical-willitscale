@@ -1,4 +1,6 @@
 global.__base = __dirname + '/';
+var apiKey = process.env.APIKEY;
+var appId = process.env.APPID;
 config = require(__base + 'config/config.js')();
 
 var logger = require(__base + 'logger/logger.winston')(module);
@@ -13,13 +15,12 @@ var reports = require(__base + 'components/reports/reports.controller');
  * 4 [POST] /reports/scalability format and submit the data for a scalability report
  */
 
-// Set apiKey and appId paramaters
-if (process.argv[2] && process.argv[3]) {
-    var apiKey = new Buffer(process.argv[2]);
-    var appId = new Buffer(process.argv[3]);
+if (apiKey && appId) {
     logger.info("Starting Stacktical bench image with api key: " + apiKey + " applicationID: " + appId);
-    } else {
+} else {
+    // Exit if the Api Key and the App ID are not provided.
     logger.error("Could not read api key and application ID as, please provide api key as parameter of the script");
+    process.exit(1);
 };
 
 var testId;
@@ -74,3 +75,4 @@ bench.createTest(apiKey, appId)
             logger.info('Unable to submit this load test results :' + reason);
         });
 });
+
