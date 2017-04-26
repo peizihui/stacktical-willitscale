@@ -38,14 +38,14 @@ bench.createTest(apiKey, appId)
     // Catch bench.createTest
     logger.error(reason);
 })
-.then(function(testParameters) {
+.then(function(test_parameters) {
     var loadResults = {'points' : []};
-    var application = testParameters.application;
+    var application = test_parameters.application;
     // Loop through the test parameters and run them
-    logger.info(application.parameters);
-    for (var i in application.parameters.testParameters.workload) {
-        var concurrency = application.parameters.testParameters.workload[i].concurrency;
-        var duration = application.parameters.testParameters.duration
+    //logger.info(application);
+    for (var i in application.test_parameters.workload) {
+        var concurrency = application.test_parameters.workload[i].concurrency;
+        var duration = application.test_parameters.duration
         // Runs a single test
         bench.getThroughput(application.url, concurrency, duration)
             .then(function(ldresults) {
