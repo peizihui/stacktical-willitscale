@@ -43,10 +43,11 @@ bench.createTest(apiKey, appId)
     var application = testParameters.application;
     // Loop through the test parameters and run them
     logger.info(application.parameters);
-    for (var i in application.parameters.parameters.testParameters) {
-        var concurrency = application.parameters.parameters.testParameters[i].cc;
+    for (var i in application.parameters.testParameters.workload) {
+        var concurrency = application.parameters.testParameters.workload[i].concurrency;
+        var duration = application.parameters.testParameters.duration
         // Runs a single test
-        bench.getThroughput(application.url, concurrency, 10)
+        bench.getThroughput(application.url, concurrency, duration)
             .then(function(ldresults) {
                 var p = parseInt(ldresults[0][1]);
                 var Xp = parseInt(ldresults[1][1]);

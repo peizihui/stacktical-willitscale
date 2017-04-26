@@ -45,7 +45,7 @@
     function createTest(apiKey, appId) {
         var createTestOptions = {
             method: 'POST',
-            uri: util.format('%s/v1/tests', config.apiUrl),
+            uri: util.format('%s/tests', config.apiUrl),
             headers: {
                 'Content-type': 'application/json',
                 'x-application': appId + '',
@@ -61,7 +61,7 @@
 
     function getParams(apiKey, appId) {
     var getParamsOptions = {
-            uri: util.format('%s/v1/tests/parameters', config.apiUrl),
+            uri: util.format('%s/tests/parameters', config.apiUrl),
             headers: {
                 'Content-type': 'application/json',
                 'x-application': appId + '',
@@ -78,7 +78,7 @@
     function loadSubmit(apiKey, appId, testId, loadresult) {
         var loadSubmitOptions = {
             method: 'POST',
-            uri: util.format('%s/v1/tests/' + testId, config.apiUrl),
+            uri: util.format('%s/tests/' + testId, config.apiUrl),
             body: loadresult,
             headers: {
                     'Content-type': 'application/json',
@@ -96,7 +96,7 @@
     function testSubmit(apiKey, appId, loadresults) {
         var loadSubmitOptions = {
             method: 'POST',
-            uri: util.format('%s/v1/reports/scalability', config.apiUrl),
+            uri: util.format('%s/reports/scalability', config.apiUrl),
             body: loadresults,
             headers: {
                     'Content-type': 'application/json',
@@ -119,7 +119,7 @@
 
             var spawn = require('child_process');
 
-            var ti = time || 60
+            var ti = time
             var loadTest = spawn.spawnSync('siege',
             [
                 "-t" + ti + "s",

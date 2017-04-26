@@ -7,19 +7,19 @@ module.exports = function() {
     {
     case "dev":
         return {
-            apiUrl : 'https://localhost:10003',
+            apiUrl : 'https://localhost:10003/v1',
             debug : debug
         };
     break;
     case "staging":
         return {
-            apiUrl : 'https://staging.stacktical.com/api/v1/'
+            apiUrl : 'https://staging.stacktical.com/api/v1'
 
         };
     break;
     default:
         return {
-            apiUrl : 'https://stacktical.com/api/v1/'
+            apiUrl : 'https://stacktical.com/api/v1'
 
         };
     }
