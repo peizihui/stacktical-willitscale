@@ -1,11 +1,11 @@
 (function() {
     'use strict';
 
-    /***************
+    /**
     * Dependencies *
     ***************/
 
-    const util = require('util');
+    var util = require('util');
     var Promise = require('bluebird');
     var requestP = require('request-promise');
     var logger = require(__base + 'logger/logger.winston')(module);
@@ -13,35 +13,33 @@
 
     var config = require(__base +'config/config.js')();
 
-    /*************
+    /**
     * INTERFACES *
     *************/
 
     module.exports = {
         createTest: createTest,
-        getParams: getParams,
+        getTestsParameters: getTestsParameters,
         getThroughput: getThroughput,
-        loadSubmit: loadSubmit,
-        testSubmit: testSubmit
+        loadSubmit: loadSubmit
     };
 
-    /*****************
+    /**
     * Implementation *
     *****************/
 
-
-    // TODO implements defaults
     var baseRequestP = requestP.defaults({
         json: true,
         strictSSL: false
     });
+
     /**
-     * Create a new Test
-     *
-     * @param {string} x-application A unique identifier for the authenticated application.
-     * @param {string} apiKey The non-expired, valid access token of the authenticated user or a valid application API key.
-     * @return {Promise} Promise The returned promise object
-     */
+    * Creates a new Test.
+    *
+    * @param {string} apiKey The non-expired, valid access token of the authenticated user or a valid application API key.
+    * @param {string} appId Unique identifier for the authenticated application.
+    * @return {Promise} Promise The returned promise object
+    */
     function createTest(apiKey, appId) {
         var createTestOptions = {
             method: 'POST',
@@ -54,13 +52,13 @@
         };
 
         return baseRequestP(createTestOptions)
-            .finally(function() {
-                logger.info('Creating test object...');
-            });
+        .finally(function() {
+            logger.info('Creating test object...');
+        });
     }
 
-    function getParams(apiKey, appId) {
-    var getParamsOptions = {
+    function getTestsParameters(apiKey, appId) {
+        var getTestsParametersOptions = {
             uri: util.format('%s/tests/parameters', config.apiUrl),
             headers: {
                 'Content-type': 'application/json',
@@ -69,10 +67,10 @@
             }
         };
 
-        return baseRequestP(getParamsOptions)
-                .finally(function() {
-                    logger.info('Getting test parameters...');
-                });
+        return baseRequestP(getTestsParametersOptions)
+        .finally(function() {
+            logger.info('Getting test parameters...');
+        });
     };
 
     function loadSubmit(apiKey, appId, testId, loadresult) {
@@ -81,83 +79,63 @@
             uri: util.format('%s/tests/' + testId, config.apiUrl),
             body: loadresult,
             headers: {
-                    'Content-type': 'application/json',
-                    'x-application': appId + '',
-                    'Authorization': 'Bearer: ' + apiKey
+                'Content-type': 'application/json',
+                'x-application': appId + '',
+                'Authorization': 'Bearer: ' + apiKey
             }
         };
 
         return baseRequestP(loadSubmitOptions)
-                .finally(function() {
-                    logger.info('Submitting single load test result...');
-                });
+        .finally(function() {
+            logger.info('Submitting single load test result...');
+        });
     };
 
-    function testSubmit(apiKey, appId, loadresults) {
-        var loadSubmitOptions = {
-            method: 'POST',
-            uri: util.format('%s/reports/scalability', config.apiUrl),
-            body: loadresults,
-            headers: {
-                    'Content-type': 'application/json',
-                    'x-application': appId + '',
-                    'Authorization': 'Bearer: ' + apiKey
-            }
-        };
-
-        return baseRequestP(loadSubmitOptions)
-                .finally(function() {
-                    logger.info('Submitting load tests...');
-                });
-    };
-
-    function getThroughput(endpoint, concurrency, time) {
-        console.log("Start Load testing against " + endpoint + " with cc of " + concurrency);
+    function getThroughput(url, concurrency, time) {
+        logger.info('Started load testing against ' + url + ' with a concurrency of ' + concurrency);
 
         return new Promise(function(resolve, reject) {
             var result;
 
             var spawn = require('child_process');
 
-            var ti = time
-            var loadTest = spawn.spawnSync('siege',
-            [
-                "-t" + ti + "s",
-                "-c"+ concurrency,
-                "-b",
-                endpoint
-            ]);
+            var loadTest = spawn.spawnSync(
+                'siege',
+                [
+                    '-t' + time + 's',
+                    '-c' + concurrency,
+                    '-b',
+                    url
+                ]
+            );
 
             // For some reason, the transaction rate is part of stderr, not stdout
-            result = loadTest.stderr.toString()
+            result = loadTest.stderr.toString();
 
-
-                var bufferResult = result.split('\n');
-
-                var validSiegeMetrics = ["Concurrency","Transaction rate"];
-
-                var bufferResult = bufferResult.filter(function(std) {
-                    return validSiegeMetrics.some(function(metric) { return std.indexOf(metric) > -1 });
+            var bufferResult = result.split('\n');
+            var validSiegeMetrics = ['Concurrency', 'Transaction rate'];
+            var bufferResult = bufferResult.filter(function(std) {
+                return validSiegeMetrics.some(function(metric) {
+                    return std.indexOf(metric) > -1;
                 });
+            });
 
-                for (var i = bufferResult.length - 1; i >= 0; i--) {
-                  bufferResult[i] = bufferResult[i].split(':');
-                  bufferResult[i][0] = lodash.trim(bufferResult[i][0]);
-                  bufferResult[i][1] = lodash.trim(bufferResult[i][1].split('trans/sec').join(''));
-                };
+            for (var i = bufferResult.length - 1; i >= 0; i--) {
+                bufferResult[i] = bufferResult[i].split(':');
+                bufferResult[i][0] = lodash.trim(bufferResult[i][0]);
+                bufferResult[i][1] = lodash.trim(bufferResult[i][1].split('trans/sec').join(''));
+            }
 
-                if (!result) {
-                    console.error(error);
-                    reject({
-                        err: error
-                    });
-
-                } else {
-                    console.log("Successfully ran the siege load test");
-                    console.log(bufferResult);
-                    resolve(bufferResult);
-                };
+            if (result) {
+                console.log(
+                    'A new result is in: ', bufferResult
+                );
+                resolve(bufferResult);
+            } else {
+                reject({
+                    err: error
+                });
+            };
         });
     }
-
 })();
