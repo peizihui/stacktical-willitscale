@@ -16,9 +16,9 @@ var reports = require(__base + 'components/reports/reports.controller');
 */
 
 if (apiKey && appId) {
-    logger.info('Welcome to the Stacktical CI Capacity Testing application.');
+    logger.info('Welcome to the Stacktical Capacity Testing application!');
 } else {
-    logger.error('The provided APIKEY and APPID credentials are not valid.');
+    logger.error('The provided API credentials are not valid. Please check you APIKEY and APPID environment variables.');
     process.exit(1);
 };
 
@@ -49,34 +49,35 @@ benchmark.createTest(apiKey, appId)
         benchmarkPromises.push(benchmark.getThroughput(application.url, concurrency, duration));
     }
 
-    Promise.all(benchmarkPromises).then(function(promiseResults) {
-        for(j=0; j<promiseResults.length; j++) {
-            var p = parseInt(promiseResults[j][0][1]);
-            var Xp = parseInt(promiseResults[j][1][1]);
-            var point = {'p': p, 'Xp': Xp};
-            loadResults.points.push(point);
-
-            workloadPromises.push(benchmark.loadSubmit(apiKey, appId, testId, point));
+    Promise.all(benchmarkPromises).then(function(loadTestResult) {
+        for(j=0; j<loadTestResult.length; j++) {
+            loadResults.points.push(loadTestResult[j]);
+            workloadPromises.push(benchmark.loadSubmit(apiKey, appId, testId, loadTestResult[j]));
         }
     }).catch(function(reason) {
-        logger.error('One of your tests has failed!', reason);
+        logger.error('One of your load tests has failed! :/', reason);
     }).then(function() {
         return Promise.all(workloadPromises).then(function(workloadResults) {
-            logger.info('All your test iterations have been successfully saved.', workloadResults);
+            logger.info('Good job, your load test results have been successfully saved. :)', workloadResults);
         });
     }).catch(function(reason) {
-        logger.error('One of our attempts to save a test iteration has failed!', reason);
+        logger.error(':( It looks like one of our attempts to save a load test has failed...', reason);
     });
 })
 .catch(function(reason) {
     logger.error(reason);
 })
 .then(function(loadResults) {
-    reports.getScalability(apiKey, appId, devSubmit)
+    reports.getScalability(apiKey, appId, loadResults)
         .then(function() {
-            logger.info('Congratulations! Your capacity test is complete. Please go to Stacktical.com to see the results.');
+            logger.info('Congratulations! Your capacity test is now complete. Please go to stacktical.com to see the results.');
         })
-        .catch(function(reason) {
-            logger.info('I was not able to proceed with your capacity test...', reason);
+        .catch(function() {
+            logger.error(
+                'Unfortunately, I was not able to fully proceed with your capacity test. '+
+                'This mostly happens your load test results don\'t converge and there are two few, '+
+                'or not sparse enough concurrency values in your test scenario. '+
+                'Please retry with a different concurrency configuration at stacktical.com/applications.'
+            );
         });
 });
