@@ -68,6 +68,8 @@ benchmark.createTest(apiKey, appId)
     logger.error(reason);
 })
 .then(function(loadResults) {
+    logger.info('Running capacity test using the following data: ', loadResults);
+    logger.info('Running capacity test using the following data: ', devSubmit);
     reports.getScalability(apiKey, appId, loadResults)
         .then(function() {
             logger.info('Congratulations! Your capacity test is now complete. Please go to stacktical.com to see the results.');
