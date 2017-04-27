@@ -91,7 +91,7 @@
         });
     };
 
-    function getThroughput(url, concurrency, time) {
+    function getThroughput(url, concurrency, time, apiKey, appId, testId) {
         logger.info('Started load testing against ' + url + ' with a concurrency of ' + concurrency);
 
         return new Promise(function(resolve, reject) {
@@ -128,9 +128,17 @@
 
             if (result) {
                 console.log(
-                    'A new result is in: ', bufferResult
+                    'Buffer is ', bufferResult
                 );
-                resolve(bufferResult);
+                
+                var Xp = parseFloat(bufferResult[0][1]);
+                var p = parseFloat(bufferResult[1][1]);
+                var point = {'p': p, 'Xp': Xp};
+
+                console.log(
+                    'A new result is in: ', point
+                );
+                resolve(point);
             } else {
                 reject({
                     err: error
