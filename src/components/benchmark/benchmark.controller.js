@@ -130,7 +130,7 @@
                 console.log(
                     'Buffer is ', bufferResult
                 );
-                
+
                 var Xp = parseFloat(bufferResult[0][1]);
                 var p = parseFloat(bufferResult[1][1]);
                 var point = {'p': p, 'Xp': Xp};
