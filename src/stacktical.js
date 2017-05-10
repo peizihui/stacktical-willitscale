@@ -1,6 +1,6 @@
 global.__base = __dirname + '/';
-var apiKey = process.env.APIKEY;
-var appId = process.env.APPID;
+var apiKey = process.env.STACKTICAL_APIKEY;
+var appId = process.env.STACKTICAL_APPID;
 config = require(__base + 'config/config.js')();
 
 var logger = require(__base + 'logger/logger.winston')(module);
