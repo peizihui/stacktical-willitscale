@@ -20,8 +20,8 @@
     module.exports = {
         createTest: createTest,
         getTestsParameters: getTestsParameters,
-        getThroughput: getThroughput,
-        loadSubmit: loadSubmit
+        loadTest: loadTest,
+        storeTestResult: storeTestResult
     };
 
     /**
@@ -73,8 +73,8 @@
         });
     };
 
-    function loadSubmit(apiKey, appId, testId, loadresult) {
-        var loadSubmitOptions = {
+    function storeTestResult(apiKey, appId, testId, loadresult) {
+        var storeTestResultOptions = {
             method: 'POST',
             uri: util.format('%s/tests/' + testId, config.apiUrl),
             body: loadresult,
@@ -85,13 +85,13 @@
             }
         };
 
-        return baseRequestP(loadSubmitOptions)
+        return baseRequestP(storeTestResultOptions)
         .finally(function() {
             logger.info('Submitting single load test result...');
         });
     };
 
-    function getThroughput(url, concurrency, time, apiKey, appId, testId) {
+    function loadTest(url, concurrency, time) {
         logger.info('Started load testing against ' + url + ' with a concurrency of ' + concurrency);
 
         return new Promise(function(resolve, reject) {
@@ -108,6 +108,11 @@
                     url
                 ]
             );
+
+            logger.info('Off to a little sleep...');
+            console.time('Just woke up');
+            spawn.spawnSync('sleep', [30]);
+            console.timeEnd('Just woke up');
 
             // For some reason, the transaction rate is part of stderr, not stdout
             result = loadTest.stderr.toString();
@@ -127,10 +132,6 @@
             }
 
             if (result) {
-                console.log(
-                    'Buffer is ', bufferResult
-                );
-                
                 var Xp = parseFloat(bufferResult[0][1]);
                 var p = parseFloat(bufferResult[1][1]);
                 var point = {'p': p, 'Xp': Xp};

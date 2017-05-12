@@ -23,63 +23,59 @@ if (apiKey && appId) {
 };
 
 var testId;
-var devSubmit = {"points":[{"p":5,"Xp":27.09},{"p":10,"Xp":43.41},{"p":15,"Xp":55},{"p":20,"Xp":62.06},{"p":25,"Xp":69.3},{"p":30,"Xp":74.63},{"p":35,"Xp":78.07},{"p":40,"Xp":80.05}]};
+var loadResults = {'points': []};
+
+var benchmarkPromises = [];
+var workloadPromises = [];
 
 benchmark.createTest(apiKey, appId)
-.then(function(test) {
-    testId = test.testId;
-    return benchmark.getTestsParameters(apiKey, appId);
-})
-.catch(function(reason) {
-    logger.error(reason);
-})
-.then(function(testParameters) {
-    var loadResults = {'points': []};
-    var application = testParameters.application;
+    .then(function(test) {
+        testId = test.testId;
+        return benchmark.getTestsParameters(apiKey, appId);
+    })
+    .catch(function(reason) {
+        logger.error(reason);
+    })
+    .then(function(testParameters) {
+        var application = testParameters.application;
 
-    logger.info('The following application has been identified.', application);
+        logger.info('The following application has been identified.', application);
 
-    var benchmarkPromises = [];
-    var workloadPromises = [];
+        for (i=0; i<application.test_parameters.workload.length; i++) {
+            var concurrency = application.test_parameters.workload[i].concurrency;
+            var duration = application.test_parameters.duration;
 
-    for (i=0; i<application.test_parameters.workload.length; i++) {
-        var concurrency = application.test_parameters.workload[i].concurrency;
-        var duration = application.test_parameters.duration;
-
-        benchmarkPromises.push(benchmark.getThroughput(application.url, concurrency, duration));
-    }
-
-    Promise.all(benchmarkPromises).then(function(loadTestResult) {
-        for(j=0; j<loadTestResult.length; j++) {
-            loadResults.points.push(loadTestResult[j]);
-            workloadPromises.push(benchmark.loadSubmit(apiKey, appId, testId, loadTestResult[j]));
+            benchmarkPromises.push(benchmark.loadTest(application.url, concurrency, duration));
         }
-    }).catch(function(reason) {
-        logger.error('One of your load tests has failed! :/', reason);
-    }).then(function() {
+
+        Promise.all(benchmarkPromises).then(function(loadTestResult) {
+            for(j=0; j<loadTestResult.length; j++) {
+                logger.info('Pushing this: ', loadTestResult[j]);
+                loadResults.points.push(loadTestResult[j]);
+                workloadPromises.push(benchmark.storeTestResult(apiKey, appId, testId, loadTestResult[j]));
+            }
+        }).catch(function(reason) {
+            logger.error('One of your load tests has failed! :/', reason);
+        }).then(function() {
+            logger.info('The capacity test will use the following data: ', loadResults);
+            reports.getScalability(apiKey, appId, loadResults)
+                .then(function() {
+                    logger.info(
+                        'Congratulations! Your capacity test is now complete. Please go to stacktical.com to see the results.'
+                    );
+                })
+                .catch(function(reason) {
+                    logger.error(
+                        'Unfortunately, I was not able to fully proceed with your capacity test. '+
+                        'This mostly happens your load test results don\'t converge and there are two few, '+
+                        'or not sparse enough concurrency values in your test scenario. '+
+                        'Please retry with a different concurrency configuration at stacktical.com/applications.'
+                    , reason);
+                });
+        });
+    })
+    .finally(function() {
         return Promise.all(workloadPromises).then(function(workloadResults) {
             logger.info('Good job, your load test results have been successfully saved. :)', workloadResults);
         });
-    }).catch(function(reason) {
-        logger.error(':( It looks like one of our attempts to save a load test has failed...', reason);
     });
-})
-.catch(function(reason) {
-    logger.error(reason);
-})
-.then(function(loadResults) {
-    logger.info('Running capacity test using the following data: ', loadResults);
-    logger.info('Running capacity test using the following data: ', devSubmit);
-    reports.getScalability(apiKey, appId, loadResults)
-        .then(function() {
-            logger.info('Congratulations! Your capacity test is now complete. Please go to stacktical.com to see the results.');
-        })
-        .catch(function() {
-            logger.error(
-                'Unfortunately, I was not able to fully proceed with your capacity test. '+
-                'This mostly happens your load test results don\'t converge and there are two few, '+
-                'or not sparse enough concurrency values in your test scenario. '+
-                'Please retry with a different concurrency configuration at stacktical.com/applications.'
-            );
-        });
-});
