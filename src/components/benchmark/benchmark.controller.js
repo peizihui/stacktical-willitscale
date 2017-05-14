@@ -109,10 +109,8 @@
                 ]
             );
 
-            logger.info('Off to a little sleep...');
-            console.time('Just woke up');
-            spawn.spawnSync('sleep', [30]);
-            console.timeEnd('Just woke up');
+            logger.info('Sleeping for 10s...');
+            spawn.spawnSync('sleep', [10]);
 
             // For some reason, the transaction rate is part of stderr, not stdout
             result = loadTest.stderr.toString();
