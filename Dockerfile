@@ -15,16 +15,18 @@ RUN wget http://download.joedog.org/siege/siege-$SIEGE_VER.tar.gz && \
 
 ENV HOME=/home/app
 #COPY package.json $HOME/bench/
-COPY siege.conf $HOME/.siege/siege.conf
+ADD siege.conf $HOME/.siege/siege.conf
 COPY . $HOME/bench
-RUN chown -R app:app $HOME/*
+## Why?
+RUN chown -R app:app $HOME/* && \
+    chown -R app:app $HOME/.siege/
 
-USER app
+#USER app
 WORKDIR $HOME/bench
 RUN npm install &&\
   npm cache clean
 
 
-CMD ["node", "src/stacktical.js"]
 COPY docker-entrypoint.sh  /usr/local/bin/
-#ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["node", "src/stacktical.js"]
