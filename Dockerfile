@@ -14,9 +14,9 @@ RUN wget http://download.joedog.org/siege/siege-$SIEGE_VER.tar.gz && \
   make install
 
 ENV HOME=/home/app
-#COPY package.json npm-shrinkwrap.json $HOME/bench/
-COPY package.json $HOME/bench/
+#COPY package.json $HOME/bench/
 COPY siege.conf $HOME/.siege/siege.conf
+COPY . $HOME/bench
 RUN chown -R app:app $HOME/*
 
 USER app
@@ -24,10 +24,6 @@ WORKDIR $HOME/bench
 RUN npm install &&\
   npm cache clean
 
-USER root
-COPY . $HOME/bench
-RUN chown -R app:app $HOME/*
-USER app
 
 CMD ["node", "src/stacktical.js"]
 COPY docker-entrypoint.sh  /usr/local/bin/
