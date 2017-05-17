@@ -37,6 +37,7 @@ benchmark.createTest(apiKey, appId)
         logger.error(reason);
     })
     .then(function(testParameters) {
+        var spawn = require('child_process');
         var application = testParameters.application;
 
         logger.info('The following application has been identified.', application);
@@ -44,8 +45,13 @@ benchmark.createTest(apiKey, appId)
         for (i=0; i<application.test_parameters.workload.length; i++) {
             var concurrency = application.test_parameters.workload[i].concurrency;
             var duration = application.test_parameters.duration;
+            var delay = application.delay || 10
 
             benchmarkPromises.push(benchmark.loadTest(application.url, concurrency, duration));
+            logger.info('Sleeping for ' + delay + 's...');
+            spawn.spawnSync('sleep', [delay]);
+            logger.info('Resuming...');
+
         }
 
         Promise.all(benchmarkPromises).then(function(loadTestResult) {

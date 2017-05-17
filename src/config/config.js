@@ -1,26 +1,17 @@
 module.exports = function() {
 
     var debug;
-    var apiEnv = process.env.STACKTICAL_API_ENV;
+    var apiEnv = process.env.STACKTICAL_API_HOST;
 
-    switch (process.env.STACKTICAL_API_ENV)
-    {
-    case "dev":
+    if (process.env.STACKTICAL_API_HOST) {
         return {
-            apiUrl : 'https://localhost:10003/v1',
+            apiUrl : apiEnv,
             debug : debug
         };
-    break;
-    case "staging":
+    } else {
         return {
-            apiUrl : 'https://staging.stacktical.com/api/v1'
-
-        };
-    break;
-    default:
-        return {
-            apiUrl : 'https://stacktical.com/api/v1'
-
+            apiUrl : 'https://stacktical.com/api/v1',
+            debug : false
         };
     }
 }
