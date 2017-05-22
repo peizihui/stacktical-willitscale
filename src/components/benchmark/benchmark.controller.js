@@ -91,7 +91,7 @@
         });
     };
 
-    function loadTest(url, concurrency, time) {
+    function loadTest(url, concurrency, time, delay) {
         logger.info('Started load testing against ' + url + ' with a concurrency of ' + concurrency);
 
         return new Promise(function(resolve, reject) {
@@ -109,6 +109,7 @@
                 ]
             );
 
+            spawn.spawnSync('sleep', [delay]);
 
             // For some reason, the transaction rate is part of stderr, not stdout
             result = loadTest.stderr.toString();
