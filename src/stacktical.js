@@ -1,76 +1,82 @@
 global.__base = __dirname + '/';
+var apiKey = process.env.STACKTICAL_APIKEY;
+var appId = process.env.STACKTICAL_APPID;
 config = require(__base + 'config/config.js')();
 
 var logger = require(__base + 'logger/logger.winston')(module);
-var Promise = require("bluebird");
-var bench = require(__base + 'components/benchmark/benchmark.controller');
+var Promise = require('bluebird');
+var benchmark = require(__base + 'components/benchmark/benchmark.controller');
 var reports = require(__base + 'components/reports/reports.controller');
 
 /*
- * 1 [POST] /tests Initiate a new test
- * 2 [GET] /tests/parameters Acquire application test parameters
- * 3 [POST] /tests/:testId Submit each test iteration results
- * 4 [POST] /reports/scalability format and submit the data for a scalability report
- */
+* 1 [POST] /tests Initiate a new test
+* 2 [GET] /tests/parameters Acquire application test parameters
+* 3 [POST] /tests/:testId Submit each test iteration results
+* 4 [POST] /reports/scalability format and submit the data for a scalability report
+*/
 
-// Set apiKey and appId paramaters
-if (process.argv[2] && process.argv[3]) {
-    var apiKey = new Buffer(process.argv[2]);
-    var appId = new Buffer(process.argv[3]);
-    logger.info("Starting Stacktical bench image with api key: " + apiKey + " applicationID: " + appId);
-    } else {
-    logger.error("Could not read api key and application ID as, please provide api key as parameter of the script");
+if (apiKey && appId) {
+    logger.info('Welcome to the Stacktical Capacity Testing application!');
+} else {
+    logger.error('The provided API credentials are not valid. Please check you APIKEY and APPID environment variables.');
+    process.exit(1);
 };
 
 var testId;
-var devSubmit = {"points":[{"p":5,"Xp":27.09},{"p":10,"Xp":43.41},{"p":15,"Xp":55},{"p":20,"Xp":62.06},{"p":25,"Xp":69.3},{"p":30,"Xp":74.63},{"p":35,"Xp":78.07},{"p":40,"Xp":80.05}]};
+var loadResults = {'points': []};
 
-// Initiates a new test
-// 1 [POST] /tests Initiate a new test
-bench.createTest(apiKey, appId)
-.then(function(test) {
-    testId = test.testId
-     // 2 [GET] /tests/parameters Acquire application test parameters
-    return bench.getParams(apiKey, appId)
-})
-.catch(function(reason) {
-    // Catch bench.createTest
-    logger.error(reason);
-})
-.then(function(testParameters) {
-    var loadResults = {'points' : []};
-    var application = testParameters.application;
-    // Loop through the test parameters and run them
-    logger.info(application.parameters);
-    for (var i in application.parameters.parameters.testParameters) {
-        var concurrency = application.parameters.parameters.testParameters[i].cc;
-        // Runs a single test
-        bench.getThroughput(application.url, concurrency, 10)
-            .then(function(ldresults) {
-                var p = parseInt(ldresults[0][1]);
-                var Xp = parseInt(ldresults[1][1]);
-                loadResults.points.push({ 'p': p, 'Xp': Xp });
-                // 3 [POST] /tests/:testId Submit each test iteration results
-                bench.loadSubmit(apiKey, appId, testId, { 'p': p, 'Xp': Xp });
-            })
-            .catch(function(reason) {
-                // Catch bench.getThroughtput
-                logger.error(reason);
-            });
-    }
-})
-.catch(function(reason) {
-    // Catch test parameters loop
-    logger.error(reason);
-})
-.then(function(loadResults) {
-    // 4 [POST] /reports/scalability format and submit the data for a scalability report
-    bench.testSubmit(apiKey, appId, devSubmit)
-        .then(function() {
-            logger.info("scalability test complete");
-        })
-        .catch(function(reason) {
-            // Catch bench.testSubmit
-            logger.info('Unable to submit this load test results :' + reason);
+var benchmarkPromises = [];
+var workloadPromises = [];
+
+benchmark.createTest(apiKey, appId)
+    .then(function(test) {
+        testId = test.testId;
+        return benchmark.getTestsParameters(apiKey, appId);
+    })
+    .catch(function(reason) {
+        logger.error(reason);
+    })
+    .then(function(testParameters) {
+        var application = testParameters.application;
+
+        logger.info('The following application has been identified.', application);
+
+        for (i=0; i<application.test_parameters.workload.length; i++) {
+            var concurrency = application.test_parameters.workload[i].concurrency;
+            var duration = application.test_parameters.duration;
+            var delay = application.test_parameters.delay || 10
+
+            benchmarkPromises.push(benchmark.loadTest(application.url, concurrency, duration, delay));
+        }
+
+        Promise.all(benchmarkPromises).then(function(loadTestResult) {
+            for(j=0; j<loadTestResult.length; j++) {
+                logger.info('Pushing this: ', loadTestResult[j]);
+                loadResults.points.push(loadTestResult[j]);
+                workloadPromises.push(benchmark.storeTestResult(apiKey, appId, testId, loadTestResult[j]));
+            }
+        }).catch(function(reason) {
+            logger.error('One of your load tests has failed! :/', reason);
+        }).then(function() {
+            logger.info('The capacity test will use the following data: ', loadResults);
+            reports.getScalability(apiKey, appId, loadResults)
+                .then(function() {
+                    logger.info(
+                        'Congratulations! Your capacity test is now complete. Please go to stacktical.com to see the results.'
+                    );
+                })
+                .catch(function(reason) {
+                    logger.error(
+                        'Unfortunately, I was not able to fully proceed with your capacity test. '+
+                        'This mostly happens your load test results don\'t converge and there are two few, '+
+                        'or not sparse enough concurrency values in your test scenario. '+
+                        'Please retry with a different concurrency configuration at stacktical.com/applications.'
+                    , reason);
+                });
         });
-});
+    })
+    .finally(function() {
+        return Promise.all(workloadPromises).then(function(workloadResults) {
+            logger.info('Good job, your load test results have been successfully saved. :)', workloadResults);
+        });
+    });

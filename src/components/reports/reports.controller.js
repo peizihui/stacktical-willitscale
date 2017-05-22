@@ -1,39 +1,52 @@
 (function() {
     'use strict';
 
-    /***************
+    /**
     * Dependencies *
     ***************/
 
-    var Promise = require('bluebird');
+    var util = require('util');
     var requestP = require('request-promise');
     var logger = require(__base + 'logger/logger.winston')(module);
 
-    /*************
+    var baseRequestP = requestP.defaults({
+        json: true,
+        strictSSL: false
+    });
+
+    /**
     * INTERFACES *
     *************/
 
     module.exports = {
-        reportSubmit: reportSubmit
+        getScalability: getScalability
     };
 
-    /*****************
+    /**
     * Implementation *
     *****************/
 
     /**
-     * fooBar
-     * @param {object} req - HTTP request object
-     * @param {object} res - HTTP response object
+     * @param {string} apiKey - HTTP request object
+     * @param {string} appId - HTTP response object
+     * @param {object} workload - HTTP response object
+     * @return {object}
      */
-    function reportSubmit(appId, apiKey, loadResults) {
-        var reportsubmitOptions = {
+    function getScalability(apiKey, appId, workload) {
+        var loadSubmitOptions = {
             method: 'POST',
-                uri: util.format('%s/v1/reports/scalability', 'https://stacktical.com/api'),
-            body: loadResults,
-            json: true
+            uri: util.format('%s/reports/scalability', config.apiUrl),
+            body: workload,
+            headers: {
+                'Content-type': 'application/json',
+                'x-application': appId + '',
+                'Authorization': 'Bearer: ' + apiKey
+            }
         };
-    }
 
-
+        return baseRequestP(loadSubmitOptions)
+            .finally(function() {
+                logger.info('Your capacity test is about to finish..');
+            });
+    };
 })();
