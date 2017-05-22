@@ -45,7 +45,7 @@ benchmark.createTest(apiKey, appId)
         for (i=0; i<application.test_parameters.workload.length; i++) {
             var concurrency = application.test_parameters.workload[i].concurrency;
             var duration = application.test_parameters.duration;
-            var delay = application.delay || 10
+            var delay = application.test_parameters.delay || 10
 
             benchmarkPromises.push(benchmark.loadTest(application.url, concurrency, duration));
             logger.info('Sleeping for ' + delay + 's...');
