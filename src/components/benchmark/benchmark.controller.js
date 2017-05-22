@@ -109,7 +109,9 @@
                 ]
             );
 
+            logger.info('Sleeping for ' + delay + 's...');
             spawn.spawnSync('sleep', [delay]);
+            logger.info('Resuming...');
 
             // For some reason, the transaction rate is part of stderr, not stdout
             result = loadTest.stderr.toString();
