@@ -23,7 +23,7 @@ if (apiKey && appId) {
 };
 
 var testId;
-var loadResults = {'points': []};
+var loadResults = {'siege': []};
 
 var benchmarkPromises = [];
 var workloadPromises = [];
@@ -71,7 +71,7 @@ benchmark.createTest(apiKey, appId)
                         'This mostly happens your load test results don\'t converge and there are two few, '+
                         'or not sparse enough concurrency values in your test scenario. '+
                         'Please retry with a different concurrency configuration at stacktical.com/applications.'
-                    , reason);
+                    , reason.error.message || reason);
                 });
         });
     })

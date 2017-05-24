@@ -10,6 +10,7 @@
     var requestP = require('request-promise');
     var logger = require(__base + 'logger/logger.winston')(module);
     var lodash = require('lodash');
+    var camelCase = require('camelcase');
 
     var config = require(__base +'config/config.js')();
 
@@ -117,7 +118,20 @@
             result = loadTest.stderr.toString();
 
             var bufferResult = result.split('\n');
-            var validSiegeMetrics = ['Concurrency', 'Transaction rate'];
+            var validSiegeMetrics = [
+				'Concurrency',
+                'Transaction rate',
+                'Transactions',
+                'Availability',
+                'Elapsed time',
+                'Data transferred',
+                'Response time',
+                'Throughput',
+                'Successful transactions',
+                'Failed transactions',
+                'Longest transaction',
+                'Shortest transaction'
+			];
             var bufferResult = bufferResult.filter(function(std) {
                 return validSiegeMetrics.some(function(metric) {
                     return std.indexOf(metric) > -1;
@@ -126,19 +140,22 @@
 
             for (var i = bufferResult.length - 1; i >= 0; i--) {
                 bufferResult[i] = bufferResult[i].split(':');
-                bufferResult[i][0] = lodash.trim(bufferResult[i][0]);
-                bufferResult[i][1] = lodash.trim(bufferResult[i][1].split('trans/sec').join(''));
+                bufferResult[i][0] = camelCase(lodash.trim(bufferResult[i][0]));
+                bufferResult[i][1] = parseFloat(lodash.trim(bufferResult[i][1].split(/%|secs|hits|trans\/sec|MB\/sec|MB/g).join('')));
             }
 
-            if (result) {
-                var Xp = parseFloat(bufferResult[0][1]);
-                var p = parseFloat(bufferResult[1][1]);
-                var point = {'p': p, 'Xp': Xp};
+            console.log(bufferResult);
 
-                console.log(
-                    'A new result is in: ', point
-                );
-                resolve(point);
+            if (result) {
+				function objectify(array) {
+					return array.reduce(function(p, c) {
+						p[c[0]] = c[1];
+						return p;
+					}, {});
+				}
+				console.log(objectify(bufferResult));
+
+                resolve(result);
             } else {
                 reject({
                     err: error
