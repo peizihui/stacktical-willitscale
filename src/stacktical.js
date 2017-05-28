@@ -23,7 +23,12 @@ if (apiKey && appId) {
 };
 
 var testId;
-var loadResults = {'siege': []};
+/*
+* # loadResults.point contains the standard Concurrency and Transaction Rate
+* # LoadResults.{{name}} contains the Formated full results metrics of the load
+* current load testing tool
+*/
+var loadResults = {'point': [], 'siege': []};
 
 var benchmarkPromises = [];
 var workloadPromises = [];
@@ -35,6 +40,7 @@ benchmark.createTest(apiKey, appId)
     })
     .catch(function(reason) {
         logger.error(reason);
+        // Exits if no test parameters can be acquired
     })
     .then(function(testParameters) {
         var application = testParameters.application;
@@ -51,8 +57,12 @@ benchmark.createTest(apiKey, appId)
 
         Promise.all(benchmarkPromises).then(function(loadTestResult) {
             for(j=0; j<loadTestResult.length; j++) {
+                var Xp = parseFloat(bufferResult.Concurrency); // Concurrency
+                var p = parseFloat(bufferResult.TransactionRate);  // Trans/sec
+                var point =  {'p': p, 'Xp': Xp};
                 logger.info('Pushing this: ', loadTestResult[j]);
-                loadResults.points.push(loadTestResult[j]);
+                loadResults.siege.push(loadTestResult[j]);
+                loadResults.points.push(point);
                 workloadPromises.push(benchmark.storeTestResult(apiKey, appId, testId, loadTestResult[j]));
             }
         }).catch(function(reason) {

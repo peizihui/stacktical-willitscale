@@ -119,7 +119,7 @@
 
             var bufferResult = result.split('\n');
             var validSiegeMetrics = [
-				'Concurrency',
+                'Concurrency',
                 'Transaction rate',
                 'Transactions',
                 'Availability',
@@ -131,7 +131,7 @@
                 'Failed transactions',
                 'Longest transaction',
                 'Shortest transaction'
-			];
+            ];
             var bufferResult = bufferResult.filter(function(std) {
                 return validSiegeMetrics.some(function(metric) {
                     return std.indexOf(metric) > -1;
@@ -144,18 +144,18 @@
                 bufferResult[i][1] = parseFloat(lodash.trim(bufferResult[i][1].split(/%|secs|hits|trans\/sec|MB\/sec|MB/g).join('')));
             }
 
-            console.log(bufferResult);
+            conscole.log(bufferResult);
 
-            if (result) {
+            if (bufferResult) {
 				function objectify(array) {
 					return array.reduce(function(p, c) {
 						p[c[0]] = c[1];
 						return p;
 					}, {});
 				}
-				console.log(objectify(bufferResult));
+                console.log(objectify(bufferResult));
 
-                resolve(result);
+                resolve(objectify(bufferResult));
             } else {
                 reject({
                     err: error
