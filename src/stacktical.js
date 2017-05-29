@@ -28,7 +28,7 @@ var testId;
 * # LoadResults.{{name}} contains the Formated full results metrics of the load
 * current load testing tool
 */
-var loadResults = {'point': [], 'siege': []};
+var loadResults = {'points': [], 'siege': []};
 
 var benchmarkPromises = [];
 var workloadPromises = [];
@@ -40,7 +40,7 @@ benchmark.createTest(apiKey, appId)
     })
     .catch(function(reason) {
         logger.error(reason);
-        // Exits if no test parameters can be acquired
+        process.exit(1);
     })
     .then(function(testParameters) {
         var application = testParameters.application;
@@ -57,8 +57,8 @@ benchmark.createTest(apiKey, appId)
 
         Promise.all(benchmarkPromises).then(function(loadTestResult) {
             for(j=0; j<loadTestResult.length; j++) {
-                var Xp = parseFloat(bufferResult.Concurrency); // Concurrency
-                var p = parseFloat(bufferResult.TransactionRate);  // Trans/sec
+                var Xp = parseFloat(loadTestResult[j].concurrency); // Concurrency
+                var p = parseFloat(loadTestResult[j].transactionRate);  // Trans/sec
                 var point =  {'p': p, 'Xp': Xp};
                 logger.info('Pushing this: ', loadTestResult[j]);
                 loadResults.siege.push(loadTestResult[j]);

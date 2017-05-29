@@ -52,10 +52,7 @@
             }
         };
 
-        return baseRequestP(createTestOptions)
-        .finally(function() {
-            logger.info('Creating test object...');
-        });
+        return baseRequestP(createTestOptions);
     }
 
     function getTestsParameters(apiKey, appId) {
@@ -144,7 +141,7 @@
                 bufferResult[i][1] = parseFloat(lodash.trim(bufferResult[i][1].split(/%|secs|hits|trans\/sec|MB\/sec|MB/g).join('')));
             }
 
-            conscole.log(bufferResult);
+            console.log(bufferResult);
 
             if (bufferResult) {
 				function objectify(array) {
