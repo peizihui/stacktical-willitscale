@@ -1,6 +1,7 @@
 global.__base = __dirname + '/';
 var apiKey = process.env.STACKTICAL_APIKEY;
 var appId = process.env.STACKTICAL_APPID;
+var svcId = process.env.STACKTICAL_SVCID;
 config = require(__base + 'config/config.js')();
 
 var logger = require(__base + 'logger/logger.winston')(module);
@@ -10,7 +11,7 @@ var reports = require(__base + 'components/reports/reports.controller');
 
 /*
 * 1 [POST] /tests Initiate a new test
-* 2 [GET] /tests/parameters Acquire application test parameters
+* 2 [GET] /tests/parameters/:serviceId Acquire application test parameters
 * 3 [POST] /tests/:testId Submit each test iteration results
 * 4 [POST] /reports/scalability format and submit the data for a scalability report
 */
@@ -28,7 +29,7 @@ var testId;
 * # LoadResults.{{name}} contains the Formated full results metrics of the load
 * current load testing tool
 */
-var loadResults = {'points': [], 'siege': []};
+var loadResults = {'points': []};
 
 var benchmarkPromises = [];
 var workloadPromises = [];
@@ -61,8 +62,7 @@ benchmark.createTest(apiKey, appId)
                 var p = parseFloat(loadTestResult[j].transactionRate);  // Trans/sec
                 var point =  {'p': p, 'Xp': Xp};
                 logger.info('Pushing this: ', loadTestResult[j]);
-                loadResults.siege.push(loadTestResult[j]);
-                loadResults.points.push(point);
+                loadResults.points.push({'p': p, 'Xp': Xp});
                 workloadPromises.push(benchmark.storeTestResult(apiKey, appId, testId, loadTestResult[j]));
             }
         }).catch(function(reason) {
