@@ -41,13 +41,14 @@
     * @param {string} appId Unique identifier for the authenticated application.
     * @return {Promise} Promise The returned promise object
     */
-    function createTest(apiKey, appId) {
+    function createTest(apiKey, appId, serviceId) {
         var createTestOptions = {
             method: 'POST',
             uri: util.format('%s/tests', config.apiUrl),
             headers: {
                 'Content-type': 'application/json',
                 'x-application': appId + '',
+                'service-id': serviceId,
                 'Authorization': 'Bearer: ' + apiKey
             }
         };
@@ -55,9 +56,9 @@
         return baseRequestP(createTestOptions);
     }
 
-    function getTestsParameters(apiKey, appId) {
+    function getTestsParameters(apiKey, appId, serviceId) {
         var getTestsParametersOptions = {
-            uri: util.format('%s/tests/parameters', config.apiUrl),
+            uri: util.format('%s/tests/parameters/' + serviceId, config.apiUrl),
             headers: {
                 'Content-type': 'application/json',
                 'x-application': appId + '',

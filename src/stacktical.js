@@ -16,7 +16,7 @@ var reports = require(__base + 'components/reports/reports.controller');
 * 4 [POST] /reports/scalability format and submit the data for a scalability report
 */
 
-if (apiKey && appId) {
+if (apiKey && appId && svcId) {
     logger.info('Welcome to the Stacktical Capacity Testing application!');
 } else {
     logger.error('The provided API credentials are not valid. Please check you APIKEY and APPID environment variables.');
@@ -34,10 +34,10 @@ var loadResults = {'points': []};
 var benchmarkPromises = [];
 var workloadPromises = [];
 
-benchmark.createTest(apiKey, appId)
+benchmark.createTest(apiKey, appId, svcId)
     .then(function(test) {
         testId = test.testId;
-        return benchmark.getTestsParameters(apiKey, appId);
+        return benchmark.getTestsParameters(apiKey, appId, svcId);
     })
     .catch(function(reason) {
         logger.error(reason);
