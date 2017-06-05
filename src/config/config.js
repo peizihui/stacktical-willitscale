@@ -1,5 +1,4 @@
 module.exports = function() {
-
     var debug;
     var apiEnv = process.env.STACKTICAL_API_HOST;
 

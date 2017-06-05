@@ -45,6 +45,9 @@
         var createTestOptions = {
             method: 'POST',
             uri: util.format('%s/tests', config.apiUrl),
+            body: {
+                service_id: serviceId
+            },
             headers: {
                 'Content-type': 'application/json',
                 'x-application': appId + '',
@@ -72,11 +75,13 @@
         });
     };
 
-    function storeTestResult(apiKey, appId, testId, loadresult) {
+    function storeTestResult(apiKey, appId, testId, loadTestResult) {
         var storeTestResultOptions = {
             method: 'POST',
             uri: util.format('%s/tests/' + testId, config.apiUrl),
-            body: loadresult,
+            body: {
+                result: loadTestResult
+            },
             headers: {
                 'Content-type': 'application/json',
                 'x-application': appId + '',
@@ -108,7 +113,7 @@
                 ]
             );
 
-            logger.info('Sleeping for ' + delay + 's...');
+            logger.info('Done! Sleeping for ' + delay + 's...');
             spawn.spawnSync('sleep', [delay]);
             logger.info('Resuming...');
 
@@ -139,19 +144,23 @@
             for (var i = bufferResult.length - 1; i >= 0; i--) {
                 bufferResult[i] = bufferResult[i].split(':');
                 bufferResult[i][0] = camelCase(lodash.trim(bufferResult[i][0]));
-                bufferResult[i][1] = parseFloat(lodash.trim(bufferResult[i][1].split(/%|secs|hits|trans\/sec|MB\/sec|MB/g).join('')));
+                bufferResult[i][1] = parseFloat(
+                    lodash.trim(
+                        bufferResult[i][1].split(/%|secs|hits|trans\/sec|MB\/sec|MB/g)
+                            .join('')
+                    )
+                );
             }
 
-            console.log(bufferResult);
-
             if (bufferResult) {
-				function objectify(array) {
-					return array.reduce(function(p, c) {
-						p[c[0]] = c[1];
-						return p;
-					}, {});
-				}
-                console.log(objectify(bufferResult));
+                function objectify(array) {
+                    return array.reduce(function(p, c) {
+                        p[c[0]] = c[1];
+                        return p;
+                    }, {});
+                }
+
+                logger.info(objectify(bufferResult));
 
                 resolve(objectify(bufferResult));
             } else {
