@@ -9,6 +9,8 @@
     var requestP = require('request-promise');
     var logger = require(__base + 'logger/logger.winston')(module);
 
+    var config = require(__base +'config/config.js')();
+
     var baseRequestP = requestP.defaults({
         json: true,
         strictSSL: false
@@ -29,7 +31,7 @@
     /**
      * @param {string} apiKey - HTTP request object
      * @param {string} appId - HTTP response object
-     * @param {object} workload - HTTP response object
+     * @param {object} getScalabilityPayload - HTTP response object
      * @return {object}
      */
     function getScalability(apiKey, appId, getScalabilityPayload) {
