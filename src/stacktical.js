@@ -35,8 +35,8 @@
         })
         .catch(function(reason) {
             logger.error(
-                (reason.error.message + ' (' + reason.error.code + ')') ||
-                reason
+                reason.error ? (reason.error.message + ' (' + reason.error.code + ')') :
+                'Unable to continue, there has been an error.'
             );
             process.exit(1);
         })
@@ -46,16 +46,23 @@
 
             logger.info('The following service has been identified.', service);
 
-            for (i=0; i<service.test_parameters.workload.length; i++) {
+            for (var i = 0; i < service.test_parameters.workload.length; i++) {
                 var concurrency = service.test_parameters.workload[i].concurrency;
                 var duration = service.test_parameters.duration;
                 var delay = service.test_parameters.delay || 10;
 
-                benchmarkPromises.push(benchmark.loadTest(service.url, concurrency, duration, delay));
+                benchmarkPromises.push(
+                    benchmark.loadTest(
+                        service.url,
+                        concurrency,
+                        duration,
+                        delay
+                    )
+                );
             }
 
             Promise.all(benchmarkPromises).then(function(loadTestResult) {
-                for(j=0; j<loadTestResult.length; j++) {
+                for(var j = 0; j < loadTestResult.length; j++) {
                     var p = parseFloat(loadTestResult[j].concurrency);
                     var Xp = parseFloat(loadTestResult[j].transactionRate);
                     var Rt = parseFloat(loadTestResult[j].responseTime);
@@ -65,8 +72,8 @@
             }).catch(function(reason) {
                 logger.error(
                     'One of your load tests has failed! :/',
-                    (reason.error.message + ' (' + reason.error.code + ')') ||
-                    reason
+                    reason.error ? (reason.error.message + ' (' + reason.error.code + ')') :
+                    'Unable to continue, there has been an error.'
                 );
             }).then(function() {
                 var getScalabilityPayload = loadResults;
@@ -86,16 +93,23 @@
                             'Unfortunately, I was not able to fully proceed with your scalability test. '+
                             'This mostly happens your load test results don\'t converge and there are two few, '+
                             'or not sparse enough concurrency values in your test scenario. ',
-                            (reason.error.message + ' (' + reason.error.code + ')') ||
-                            reason
+                            reason.error ? (reason.error.message + ' (' + reason.error.code + ')') :
+                            'Unable to continue.'
                         );
                         process.exit(1);
                     });
             });
         })
-        .finally(function() {
+        .catch(function(reason) {
+            logger.error(
+                reason.error ? (reason.error.message + ' (' + reason.error.code + ')') :
+                'Unable to continue, there has been an error.'
+            );
+            process.exit(1);
+        })
+        .then(function() {
             return Promise.all(workloadPromises).then(function(workloadResults) {
-                logger.info('Good job, your load test results have been successfully saved. :)', workloadResults);
+                logger.info('Your load test results have been archived for future reference.', workloadResults);
             });
         });
 })();
