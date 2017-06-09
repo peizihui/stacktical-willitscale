@@ -10,6 +10,7 @@
     var requestP = require('request-promise');
     var logger = require(__base + 'logger/logger.winston')(module);
     var lodash = require('lodash');
+    var camelCase = require('camelcase');
 
     var config = require(__base +'config/config.js')();
 
@@ -40,26 +41,27 @@
     * @param {string} appId Unique identifier for the authenticated application.
     * @return {Promise} Promise The returned promise object
     */
-    function createTest(apiKey, appId) {
+    function createTest(apiKey, appId, serviceId) {
         var createTestOptions = {
             method: 'POST',
             uri: util.format('%s/tests', config.apiUrl),
+            body: {
+                service_id: serviceId
+            },
             headers: {
                 'Content-type': 'application/json',
                 'x-application': appId + '',
+                'service-id': serviceId,
                 'Authorization': 'Bearer: ' + apiKey
             }
         };
 
-        return baseRequestP(createTestOptions)
-        .finally(function() {
-            logger.info('Creating test object...');
-        });
+        return baseRequestP(createTestOptions);
     }
 
-    function getTestsParameters(apiKey, appId) {
+    function getTestsParameters(apiKey, appId, serviceId) {
         var getTestsParametersOptions = {
-            uri: util.format('%s/tests/parameters', config.apiUrl),
+            uri: util.format('%s/tests/parameters/' + serviceId, config.apiUrl),
             headers: {
                 'Content-type': 'application/json',
                 'x-application': appId + '',
@@ -73,11 +75,13 @@
         });
     };
 
-    function storeTestResult(apiKey, appId, testId, loadresult) {
+    function storeTestResult(apiKey, appId, testId, loadTestResult) {
         var storeTestResultOptions = {
             method: 'POST',
             uri: util.format('%s/tests/' + testId, config.apiUrl),
-            body: loadresult,
+            body: {
+                result: loadTestResult
+            },
             headers: {
                 'Content-type': 'application/json',
                 'x-application': appId + '',
@@ -109,7 +113,7 @@
                 ]
             );
 
-            logger.info('Sleeping for ' + delay + 's...');
+            logger.info('Done! Sleeping for ' + delay + 's...');
             spawn.spawnSync('sleep', [delay]);
             logger.info('Resuming...');
 
@@ -117,7 +121,20 @@
             result = loadTest.stderr.toString();
 
             var bufferResult = result.split('\n');
-            var validSiegeMetrics = ['Concurrency', 'Transaction rate'];
+            var validSiegeMetrics = [
+                'Concurrency',
+                'Transaction rate',
+                'Transactions',
+                'Availability',
+                'Elapsed time',
+                'Data transferred',
+                'Response time',
+                'Throughput',
+                'Successful transactions',
+                'Failed transactions',
+                'Longest transaction',
+                'Shortest transaction'
+            ];
             var bufferResult = bufferResult.filter(function(std) {
                 return validSiegeMetrics.some(function(metric) {
                     return std.indexOf(metric) > -1;
@@ -126,19 +143,26 @@
 
             for (var i = bufferResult.length - 1; i >= 0; i--) {
                 bufferResult[i] = bufferResult[i].split(':');
-                bufferResult[i][0] = lodash.trim(bufferResult[i][0]);
-                bufferResult[i][1] = lodash.trim(bufferResult[i][1].split('trans/sec').join(''));
+                bufferResult[i][0] = camelCase(lodash.trim(bufferResult[i][0]));
+                bufferResult[i][1] = parseFloat(
+                    lodash.trim(
+                        bufferResult[i][1].split(/%|secs|hits|trans\/sec|MB\/sec|MB/g)
+                            .join('')
+                    )
+                );
             }
 
-            if (result) {
-                var Xp = parseFloat(bufferResult[0][1]);
-                var p = parseFloat(bufferResult[1][1]);
-                var point = {'p': p, 'Xp': Xp};
+            if (bufferResult) {
+                function objectify(array) {
+                    return array.reduce(function(p, c) {
+                        p[c[0]] = c[1];
+                        return p;
+                    }, {});
+                }
 
-                console.log(
-                    'A new result is in: ', point
-                );
-                resolve(point);
+                logger.info(objectify(bufferResult));
+
+                resolve(objectify(bufferResult));
             } else {
                 reject({
                     err: error
