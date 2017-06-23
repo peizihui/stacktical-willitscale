@@ -21,7 +21,7 @@ COPY . /$HOME/bench/
 RUN chown -R app:app $HOME/* && \
     chown -R app:app $HOME/.siege/
 
-#USER app
+USER app
 WORKDIR $HOME/bench
 RUN npm install &&\
   npm cache clean
