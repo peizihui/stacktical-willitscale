@@ -76,12 +76,13 @@
                     'Unable to continue, there has been an error.'
                 );
             }).then(function() {
-                var getScalabilityPayload = loadResults;
-                getScalabilityPayload.test_id = testId;
-                getScalabilityPayload.stack_id = stackId;
+                var createScalabilityReportPayload = loadResults;
+                createScalabilityReportPayload.test_id = testId;
+                createScalabilityReportPayload.stack_id = stackId;
+                createScalabilityReportPayload.service_id = svcId;
 
-                logger.info('The scalability test will use the following data: ', getScalabilityPayload);
-                reports.getScalability(apiKey, appId, getScalabilityPayload)
+                logger.info('The scalability test will use the following data: ', createScalabilityReportPayload);
+                reports.createScalabilityReport(apiKey, appId, createScalabilityReportPayload)
                     .then(function() {
                         logger.info(
                             'Congratulations! Your scalability test is now complete. ' +
