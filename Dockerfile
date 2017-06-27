@@ -15,13 +15,13 @@ RUN wget http://download.joedog.org/siege/siege-$SIEGE_VER.tar.gz && \
 
 ENV HOME=/home/app
 #COPY package.json $HOME/bench/
-ADD siege.conf $HOME/.siege/siege.conf
-COPY . $HOME/bench
+COPY .siege/siege.conf $HOME/.siege/siege.conf
+COPY . /$HOME/bench/
 ## Why?
 RUN chown -R app:app $HOME/* && \
     chown -R app:app $HOME/.siege/
 
-#USER app
+USER app
 WORKDIR $HOME/bench
 RUN npm install &&\
   npm cache clean
