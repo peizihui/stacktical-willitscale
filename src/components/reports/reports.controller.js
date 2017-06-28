@@ -21,7 +21,7 @@
     *************/
 
     module.exports = {
-        getScalability: getScalability
+        createScalabilityReport: createScalabilityReport
     };
 
     /**
@@ -31,14 +31,14 @@
     /**
      * @param {string} apiKey - HTTP request object
      * @param {string} appId - HTTP response object
-     * @param {object} getScalabilityPayload - HTTP response object
+     * @param {object} createScalabilityReportPayload - HTTP response object
      * @return {object}
      */
-    function getScalability(apiKey, appId, getScalabilityPayload) {
+    function createScalabilityReport(apiKey, appId, createScalabilityReportPayload) {
         var loadSubmitOptions = {
             method: 'POST',
-            uri: util.format('%s/reports/scalability', config.apiUrl),
-            body: getScalabilityPayload,
+            uri: util.format('%s/reports', config.apiUrl),
+            body: createScalabilityReportPayload,
             headers: {
                 'Content-type': 'application/json',
                 'x-application': appId + '',
