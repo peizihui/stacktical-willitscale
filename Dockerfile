@@ -1,5 +1,5 @@
 FROM node:7.2.1
-ENV SIEGE_VER=4.0.2
+ENV SIEGE_VER=3.1.3
 
 RUN useradd --user-group --create-home --shell /bin/false app &&\
   npm install --global npm@3.10.8 &&\
