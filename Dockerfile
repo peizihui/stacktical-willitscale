@@ -1,5 +1,6 @@
 FROM node:7.2.1
 ENV SIEGE_VER=3.1.3
+ENV SIEGE_CONF=/usr/local/etc/siegerc
 
 RUN useradd --user-group --create-home --shell /bin/false app &&\
   npm install --global npm@3.10.8 &&\
@@ -14,12 +15,10 @@ RUN wget http://download.joedog.org/siege/siege-$SIEGE_VER.tar.gz && \
   make install
 
 ENV HOME=/home/app
-#COPY package.json $HOME/bench/
-COPY .siege/siege.conf $HOME/.siege/siege.conf
+COPY .siege/siege.conf $SIEGE_CONF
 COPY . /$HOME/bench/
-## Why?
 RUN chown -R app:app $HOME/* && \
-    chown -R app:app $HOME/.siege/
+    chown -R app:app $SIEGE_CONF
 
 USER app
 WORKDIR $HOME/bench
