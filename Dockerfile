@@ -1,4 +1,4 @@
-FROM node:8.1.2
+FROM node:6.11.0
 ENV SIEGE_VER=3.1.3
 ENV SIEGE_CONF=/usr/local/etc/siegerc
 
