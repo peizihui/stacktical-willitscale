@@ -3,7 +3,6 @@ ENV SIEGE_VER=3.1.3
 ENV SIEGE_CONF=/usr/local/etc/siegerc
 
 RUN useradd --user-group --create-home --shell /bin/false app &&\
-  npm install --global npm@3.10.8 &&\
   apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
 # Compile siege with SSL support
