@@ -3,14 +3,13 @@ ENV SIEGE_VER=3.1.3
 ENV SIEGE_CONF=/usr/local/etc/siegerc
 
 RUN useradd --user-group --create-home --shell /bin/false app &&\
-  npm install --global npm@3.10.8 &&\
-  apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+  apt-get update && apt-get install -y wget openssl libssl1.0.0 libssl-dev && rm -rf /var/lib/apt/lists/*
 
 # Compile siege with SSL support
 RUN wget http://download.joedog.org/siege/siege-$SIEGE_VER.tar.gz && \
   tar zxvf siege-$SIEGE_VER.tar.gz && \
   cd siege-*/ && \
-  ./configure --with-ssl && \
+  ./configure --with-ssl=/usr/local/ssl && \
   make && \
   make install
 
