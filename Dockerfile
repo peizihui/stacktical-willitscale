@@ -1,9 +1,8 @@
 FROM node:6.11.0
-ENV SIEGE_VER=3.1.4
+ENV SIEGE_VER=3.1.3
 ENV SIEGE_CONF=/usr/local/etc/siegerc
 
-RUN useradd --user-group --create-home --shell /bin/false app &&\
-  apt-get update && apt-get install -y wget openssl libssl1.0.0 libssl-dev && rm -rf /var/lib/apt/lists/*
+RUN useradd --user-group --create-home --shell /bin/false app
 
 # Compile siege with SSL support
 RUN wget http://download.joedog.org/siege/siege-$SIEGE_VER.tar.gz && \
