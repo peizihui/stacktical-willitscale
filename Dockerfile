@@ -1,10 +1,12 @@
-FROM node:6.11.0
+FROM node:6.11.0-alpine
 ENV SIEGE_VER=3.1.3
 ENV SIEGE_CONF=/usr/local/etc/siegerc
 
-RUN useradd --user-group --create-home --shell /bin/false app
+RUN adduser -S app
 
 # Compile siege with SSL support
+RUN apk add --no-cache -t build-dependencies make gcc g++ python libtool autoconf automake \
+  && apk del build-dependencies
 RUN wget http://download.joedog.org/siege/siege-$SIEGE_VER.tar.gz && \
   tar zxvf siege-$SIEGE_VER.tar.gz && \
   cd siege-*/ && \
