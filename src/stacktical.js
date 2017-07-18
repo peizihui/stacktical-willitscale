@@ -66,8 +66,11 @@
                     var p = parseFloat(loadTestResult[j].concurrency);
                     var Xp = parseFloat(loadTestResult[j].transactionRate);
                     var Rt = parseFloat(loadTestResult[j].responseTime);
-                    loadResults.points.push({'p': p, 'Xp': Xp, 'Rt': Rt});
-                    workloadPromises.push(benchmark.storeTestResult(apiKey, appId, testId, loadTestResult[j]));
+                    /* Skip pushing null values */
+                    if !( p == null || Xp == null || Rt == null) {
+                        loadResults.points.push({'p': p, 'Xp': Xp, 'Rt': Rt});
+                        workloadPromises.push(benchmark.storeTestResult(apiKey, appId, testId, loadTestResult[j]));
+                    }
                 }
             }).catch(function(reason) {
                 logger.error(
