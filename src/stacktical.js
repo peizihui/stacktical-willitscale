@@ -96,8 +96,8 @@
                     .catch(function(reason) {
                         logger.error(
                             'Unfortunately, I was not able to fully proceed with your scalability test. '+
-                            'This mostly happens your load test results don\'t converge and there are two few, '+
-                            'or not sparse enough concurrency values in your test scenario. '
+                            'This mostly happens with bad load test measures or bad testing parameters. '+
+                            'Please retry or consider contacting support at support@stacktical.com for assistance.'
                         );
                         process.exit(1);
                     });
