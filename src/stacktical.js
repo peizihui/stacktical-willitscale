@@ -35,7 +35,6 @@
         })
         .catch(function(reason) {
             logger.error(
-                reason.error ? (reason.error.message + ' (' + reason.error.code + ')') :
                 'Unable to continue, there has been an error.'
             );
             process.exit(1);
@@ -66,14 +65,19 @@
                     var p = parseFloat(loadTestResult[j].concurrency);
                     var Xp = parseFloat(loadTestResult[j].transactionRate);
                     var Rt = parseFloat(loadTestResult[j].responseTime);
-                    loadResults.points.push({'p': p, 'Xp': Xp, 'Rt': Rt});
-                    workloadPromises.push(benchmark.storeTestResult(apiKey, appId, testId, loadTestResult[j]));
+
+                    if (
+                        (p != null && p != 0) &&
+                        (Xp != null && Xp != 0) &&
+                        (Rt != null && Rt != 0)
+                    ) {
+                        loadResults.points.push({'p': p, 'Xp': Xp, 'Rt': Rt});
+                        workloadPromises.push(benchmark.storeTestResult(apiKey, appId, testId, loadTestResult[j]));
+                    }
                 }
             }).catch(function(reason) {
                 logger.error(
-                    'One of your load tests has failed! :/',
-                    reason.error ? (reason.error.message + ' (' + reason.error.code + ')') :
-                    'Unable to continue, there has been an error.'
+                    'One of your load tests has failed! :/'
                 );
             }).then(function() {
                 var createScalabilityReportPayload = loadResults;
@@ -92,10 +96,8 @@
                     .catch(function(reason) {
                         logger.error(
                             'Unfortunately, I was not able to fully proceed with your scalability test. '+
-                            'This mostly happens your load test results don\'t converge and there are two few, '+
-                            'or not sparse enough concurrency values in your test scenario. ',
-                            reason.error ? (reason.error.message + ' (' + reason.error.code + ')') :
-                            'Unable to continue.'
+                            'This mostly happens with bad load test measures or bad testing parameters. '+
+                            'Please retry or consider contacting support at support@stacktical.com for assistance.'
                         );
                         process.exit(1);
                     });
@@ -103,7 +105,6 @@
         })
         .catch(function(reason) {
             logger.error(
-                reason.error ? (reason.error.message + ' (' + reason.error.code + ')') :
                 'Unable to continue, there has been an error.'
             );
             process.exit(1);
