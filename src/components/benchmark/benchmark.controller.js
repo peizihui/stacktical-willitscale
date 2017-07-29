@@ -152,17 +152,24 @@
                 );
             }
 
+            /**
+             * @param {object} array
+             * @return {array}
+             */
+            function objectify(array) {
+                return array.reduce(function(p, c) {
+                    p[c[0]] = c[1];
+                    return p;
+                }, {});
+            }
+
             if (bufferResult) {
-                function objectify(array) {
-                    return array.reduce(function(p, c) {
-                        p[c[0]] = c[1];
-                        return p;
-                    }, {});
+                if (objectify(bufferResult)) {
+                    logger.info(objectify(bufferResult));
+                    resolve(objectify(bufferResult));
+                } else {
+                    resolve(false);
                 }
-
-                logger.info(objectify(bufferResult));
-
-                resolve(objectify(bufferResult));
             } else {
                 reject({
                     err: error
