@@ -18,7 +18,7 @@
         "camelcase": 2,
         "comma-dangle": 0,
         "indent": [2, 4],
-        "max-len": [2, 128],
+        "max-len": [2, 192],
         "no-console": 2,
         "no-negated-condition": 2,
         "no-undef": 0,

@@ -24,7 +24,9 @@
 
     var testId;
     var stackId;
+    var point;
     var loadResults = {'points': []};
+    var flaggedResults = [];
     var benchmarkPromises = [];
     var workloadPromises = [];
 
@@ -61,23 +63,90 @@
             }
 
             Promise.all(benchmarkPromises).then(function(loadTestResult) {
-                for(var j = 0; j < loadTestResult.length; j++) {
-                    var p = parseFloat(loadTestResult[j].concurrency);
-                    var Xp = parseFloat(loadTestResult[j].transactionRate);
-                    var Rt = parseFloat(loadTestResult[j].responseTime);
+                if (service.test_parameters.autoclean == true) {
+                    var previousIndex;
+                    var nextIndex;
 
-                    if (
-                        (p != null && p != 0) &&
-                        (Xp != null && Xp != 0) &&
-                        (Rt != null && Rt != 0)
-                    ) {
-                        loadResults.points.push({'p': p, 'Xp': Xp, 'Rt': Rt});
+                    for(var j = 0; j < loadTestResult.length; j++) {
+                        previousIndex = parseFloat(j)-1;
+                        nextIndex = parseFloat(j)+1;
+
+                        /**
+                         * PASS 1
+                         */
+                        if (loadTestResult[previousIndex] != null) {
+                            if (parseFloat(loadTestResult[j].concurrency) < parseFloat(loadTestResult[previousIndex].concurrency)) {
+                                loadTestResult[j].flagged = true;
+                                logger.info(
+                                    'A load result has been flagged for auto clean (PASS 1, concurrency check).',
+                                    j,
+                                    loadTestResult[previousIndex].concurrency,
+                                    loadTestResult[j].concurrency
+                                );
+                            }
+                        }
+
+
+                        /**
+                         * PASS 2
+                         */
+                        if (
+                             loadTestResult[previousIndex] != null &&
+                             loadTestResult[nextIndex] != null
+                        ) {
+                            if (
+                                parseFloat(loadTestResult[j].transactionRate) < parseFloat(loadTestResult[previousIndex].transactionRate) &&
+                                parseFloat(loadTestResult[j].transactionRate) < parseFloat(loadTestResult[nextIndex].transactionRate)
+                            ) {
+                                loadTestResult[j].flagged = true;
+                                logger.info(
+                                    'A load result has been flagged for auto clean (PASS 2, transaction rate check).',
+                                    j,
+                                    loadTestResult[previousIndex].transactionRate,
+                                    loadTestResult[nextIndex].transactionRate,
+                                    loadTestResult[j].transactionRate
+                                );
+                            }
+                        }
+                    }
+                }
+
+                for(var j = 0; j < loadTestResult.length; j++) {
+                    if (loadTestResult[j] != false) {
+                        var p = parseFloat(loadTestResult[j].concurrency);
+                        var Xp = parseFloat(loadTestResult[j].transactionRate);
+                        var Rt = parseFloat(loadTestResult[j].responseTime);
+                        var flaggedResult;
+
+                        if (loadTestResult[j].hasOwnProperty('flagged') && loadTestResult[j].flagged == true) {
+                            flaggedResult = true;
+                            flaggedResults.push(loadTestResult[j]);
+                        } else {
+                            flaggedResult = false;
+                        }
+
+                        // Non valid values won't be added to the scalability test workload
+                        if (
+                            (p != null && p != 0) &&
+                            (Xp != null && Xp != 0) &&
+                            (Rt != null && Rt != 0) &&
+                            (flaggedResult === false)
+                        ) {
+                            point = {
+                                'p': p,
+                                'Xp': Xp,
+                                'Rt': Rt
+                            };
+
+                            loadResults.points.push(point);
+                        }
+
                         workloadPromises.push(benchmark.storeTestResult(apiKey, appId, testId, loadTestResult[j]));
                     }
                 }
             }).catch(function(reason) {
                 logger.error(
-                    'One of your load tests has failed! :/'
+                    'Unable to proceed with one of your load tests, please retry.'
                 );
             }).then(function() {
                 var createScalabilityReportPayload = loadResults;
@@ -95,9 +164,10 @@
                     })
                     .catch(function(reason) {
                         logger.error(
-                            'Unfortunately, I was not able to fully proceed with your scalability test. '+
-                            'This mostly happens with bad load test measures or bad testing parameters. '+
-                            'Please retry or consider contacting support at support@stacktical.com for assistance.'
+                            'Unfortunately, I was not able to proceed with your scalability test. '+
+                            'This generally happens because of non suitable load testing measurements. ' +
+                            'Try to update your service parameters accordingly and ensure a steady testing environment. ' +
+                            'Also consider contacting support at support@stacktical.com for further assistance.'
                         );
                         process.exit(1);
                     });
