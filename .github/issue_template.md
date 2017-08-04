@@ -1,7 +1,15 @@
-*Make sure you only keep the relevant section based on the nature of the current issue, JOB STORY or BUG.*
+*Make sure you only keep the relevant section based on the nature of the current issue, EPIC, JOB STORY or BUG.*
 ___
 
+## EPIC
+#### DESCRIPTION
+
+`<epic description>`
+___
+
+
 ## JOB STORY
+#### DESCRIPTION
 
 When `<persona>` `<usage context>`, `<persona>` wants to `<motivation>` so that `<expected outcome>`
 
@@ -12,7 +20,6 @@ When `<persona>` `<usage context>`, `<persona>` wants to `<motivation>` so that 
 ...
 * `<persona>` is able to `<outcome>` n
 ___
-
 
 
 ## BUG
