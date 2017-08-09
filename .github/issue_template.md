@@ -1,4 +1,4 @@
-*Make sure you only keep the relevant section based on the nature of the current issue, EPIC, JOB STORY or BUG.*
+*Make sure you only keep the relevant section based on the nature of the current issue, EPIC, JOB STORY, TASK or BUG.*
 ___
 
 ## EPIC
@@ -19,6 +19,13 @@ When `<persona>` `<usage context>`, `<persona>` wants to `<motivation>` so that 
 * `<persona>` is able to `<outcome>` 2  
 ...
 * `<persona>` is able to `<outcome>` n
+___
+
+
+## TASK
+#### DESCRIPTION
+
+`<task description>` (can be a study, a configuration, a development...)
 ___
 
 
