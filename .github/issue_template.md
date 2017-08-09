@@ -28,7 +28,7 @@ ___
 `<task description>` (can be a study, a configuration, a development...)
 
 #### DELIVERABLE
-If different than code.
+`<doc type>` and/or `<update file>`, `<update file type>`...
 ___
 
 
