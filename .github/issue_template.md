@@ -25,10 +25,11 @@ ___
 ## TASK
 #### DESCRIPTION
 
-`<task description>` (can be a study, a configuration, a development...)
+`<task description>`
 
 #### DELIVERABLE
-`<doc type>` and/or `<update file>`, `<update file type>`...
+
+`<document>`, `<configuration file>`, `<development file>`...
 ___
 
 
