@@ -26,6 +26,9 @@ ___
 #### DESCRIPTION
 
 `<task description>` (can be a study, a configuration, a development...)
+
+#### DELIVERABLE
+If different than code.
 ___
 
 
