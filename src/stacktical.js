@@ -169,7 +169,7 @@
                             'Try to update your service parameters accordingly and ensure a steady testing environment. ' +
                             'Also consider contacting support at support@stacktical.com for further assistance.'
                         );
-                        process.exit(1);
+                        process.exit(0);
                     });
             });
         })
