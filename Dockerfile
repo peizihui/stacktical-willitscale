@@ -26,6 +26,7 @@ RUN npm install &&\
   npm cache clean
 
 
+ADD VERSION .
 COPY docker-entrypoint.sh  /usr/local/bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["node", "src/stacktical.js"]
