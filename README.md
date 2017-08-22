@@ -1,4 +1,4 @@
-# stacktical-bench
+# stacktical-wilitscale
 
 ## Requirements
 siege package must be installed
