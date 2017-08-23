@@ -1,8 +1,10 @@
 version: 2
 jobs:
     build:
-        docker:
-            - image: circleci/node:6.10
+#        docker:
+#            - image: circleci/node:6.10
+        machine: true
+        working_directory: ~/bench
         steps:
             - checkout
             - run: echo "Stacktical Willitscale!"
