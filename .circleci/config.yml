@@ -6,3 +6,12 @@ jobs:
         steps:
             - checkout
             - run: echo "Stacktical Willitscale!"
+            - run: nproc
+            - run: ulimit -aH
+            - run: docker run --rm
+                -e STACKTICAL_API_HOST=https://staging.stacktical.com/api/v1
+                -e STACKTICAL_APIKEY=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJlNGUwY2JiNS0zMGI5LTQwYjAtYjA4OC01ODczYTA4MTVlYWQiLCJqdGkiOiIwZjVlMzAyNy1jYmNiLTRjNTYtYTcwYS0zZDVmMzI2YWY2YmEiLCJjbGllbnQiOnsidHlwZSI6ImFwcGxpY2F0aW9uIn0sInNjb3BlcyI6WyJ0ZXN0cyIsInJlcG9ydHMiXX0.5frFLrXQJNnFYwYMsJl8YOkWhYVnKXe7GZeFn9uW-uI
+                -e STACKTICAL_APPID=e4e0cbb5-30b9-40b0-b088-5873a0815ead
+                -e STACKTICAL_SVCID=7331
+                -e HTTP_AUTH=admin:NTdmZDBmMjIwZDEyOGY3NDMyN2JmMjVk
+                --name bench stacktical/bench:1.0.2
