@@ -1,30 +1,26 @@
-FROM node:6.11.0
-ENV SIEGE_VER=3.1.3
-ENV SIEGE_CONF=/usr/local/etc/siegerc
+FROM node:6
 
-RUN useradd --user-group --create-home --shell /bin/false app
+RUN useradd --user-group --create-home --shell /bin/false stacktical
 
-# Compile siege with SSL support
-RUN wget http://download.joedog.org/siege/siege-$SIEGE_VER.tar.gz && \
-  tar zxvf siege-$SIEGE_VER.tar.gz && \
-  cd siege-*/ && \
-  ./configure --with-ssl=/usr/local/ssl && \
+RUN apt-get update && \
+  apt-get install build-essential libssl-dev git -y
+
+RUN git clone https://github.com/wg/wrk.git wrk && \
+  cd wrk && \
   make && \
-  make install
+  cp wrk /usr/local/bin
 
-ENV HOME=/home/app
-COPY .siege/siege.conf $SIEGE_CONF
-COPY . /$HOME/bench/
-RUN chown -R app:app $HOME/* && \
-    chown -R app:app $SIEGE_CONF && \
-    mkdir $HOME/.siege/ && \
-    ln -s  $SIEGE_CONF $HOME/.siege/siege.conf
+ENV HOME=/home/stacktical
 
-USER app
-WORKDIR $HOME/bench
-RUN npm install &&\
+COPY . /$HOME/willitscale
+
+RUN chown -R stacktical:stacktical $HOME/*
+
+USER stacktical
+
+WORKDIR $HOME/willitscale
+
+RUN npm install && \
   npm cache clean
 
-COPY docker-entrypoint.sh  /usr/local/bin/
-ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["node", "src/stacktical.js"]
