@@ -50,7 +50,7 @@
             for (var i = 0; i < service.test_parameters.workload.length; i++) {
                 var concurrency = service.test_parameters.workload[i].concurrency;
                 var duration = service.test_parameters.duration;
-                var delay = service.test_parameters.delay || 10;
+                var delay = service.test_parameters.delay || 30;
 
                 benchmarkPromises.push(
                     benchmark.loadTest(
@@ -63,6 +63,8 @@
             }
 
             Promise.all(benchmarkPromises).then(function(loadTestResult) {
+                logger.info('New test data available: ', loadTestResult);
+
                 if (service.test_parameters.autoclean == true) {
                     var previousIndex;
                     var nextIndex;
@@ -144,10 +146,12 @@
                         workloadPromises.push(benchmark.storeTestResult(apiKey, appId, testId, loadTestResult[j]));
                     }
                 }
-            }).catch(function(reason) {
+            }).catch(function(e) {
                 logger.error(
                     'Unable to proceed with one of your load tests, please retry.'
                 );
+
+                throw e;
             }).then(function() {
                 var createScalabilityReportPayload = loadResults;
                 createScalabilityReportPayload.test_id = testId;
@@ -175,7 +179,8 @@
         })
         .catch(function(reason) {
             logger.error(
-                'Unable to continue, there has been an error.'
+                'Unable to continue, there has been an error.',
+                reason
             );
             process.exit(1);
         })
