@@ -167,7 +167,7 @@
                     .then(function(response) {
                         logger.info(
                             'Congratulations! Your scalability test is now complete. ' +
-                            'Please go to https://stacktical.com/willitscale/' + response.report.uuid + ' to see the results.'
+                            'Please go to https://stacktical.com/willitscale/' + response.report.serial + ' to see the results.'
                         );
                     })
                     .catch(function(reason) {
