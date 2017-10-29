@@ -117,7 +117,34 @@
         result.dataTransferred = m[3];
 
         var latencyMinMax = lines[3].split(/[\t ]+/);
+
         result.responseTime = latencyMinMax[2];
+
+        function round(value, decimals) {
+            return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+        }
+
+        if (/ms/i.test(result.responseTime)) {
+            logger.info('Spotted response time in ms unit, converting...');
+            result.responseTime = result.responseTime.replace('ms','');
+            result.responseTime = round(result.responseTime / 1000, 3);
+            logger.info('Converted to ' + result.responseTime + ' seconds!');
+        }
+
+        if (/m/i.test(result.responseTime)) {
+            logger.info('Spotted response time in m unit, converting...');            
+            result.responseTime = result.responseTime.replace('m','');
+            result.responseTime = round(result.responseTime * 60, 3);
+            logger.info('Converted to ' + result.responseTime + ' seconds!');            
+        }
+
+        if (/h/i.test(result.responseTime)) {
+            logger.info('Spotted response time in h unit, converting...');                        
+            result.responseTime = result.responseTime.replace('h','');
+            result.responseTime = round(result.responseTime * 3600, 3);
+            logger.info('Converted to ' + result.responseTime + ' seconds!');            
+        }
+
         result.latencyAvg = latencyMinMax[2];
         result.latencyStdev = latencyMinMax[3];
         result.latencyMax = latencyMinMax[4];
@@ -176,19 +203,31 @@
         }
     }
 
-    function loadTest(url, concurrency, duration, delay) {
+    function loadTest(url, concurrency, duration, delay, header, authorization) {
         concurrency = Math.trunc(concurrency);
+        var customHeader;
+        var customAuthorizationHeader;
         
         logger.info('Started load testing against ' + url + ' with a concurrency of ' + concurrency);
         
         var result;
 
         return new Promise(function(resolve, reject) {
-            try {
+            try {                
+                if (authorization) {
+                    customAuthorizationHeader = '-H \'Authorization: ' + authorization + '\'';
+                }
+
+                if (header) {
+                    customHeader = '-H \'' + header + '\'';
+                }
+
                 var testRun = child.spawnSync(
                     'wrk',
                     [
                         '-t1',
+                        customHeader,
+                        customAuthorizationHeader,
                         '-c' + concurrency,
                         '-d' + duration + 's',                        
                         '--latency',

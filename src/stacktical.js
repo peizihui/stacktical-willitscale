@@ -51,13 +51,17 @@
                 var concurrency = service.test_parameters.workload[i].concurrency;
                 var duration = service.test_parameters.duration;
                 var delay = service.test_parameters.delay || 30;
-
+                var header = service.test_parameters.header;
+                var authorization = service.test_parameters.authorization;
+                
                 benchmarkPromises.push(
                     benchmark.loadTest(
                         service.url,
                         concurrency,
                         duration,
-                        delay
+                        delay,
+                        header,
+                        authorization
                     )
                 );
             }
@@ -160,10 +164,10 @@
 
                 logger.info('The scalability test will use the following data: ', createScalabilityReportPayload);
                 reports.createScalabilityReport(apiKey, appId, createScalabilityReportPayload)
-                    .then(function() {
+                    .then(function(response) {
                         logger.info(
                             'Congratulations! Your scalability test is now complete. ' +
-                            'Please go to stacktical.com to see the results.'
+                            'Please go to https://stacktical.com/willitscale/' + response.report.uuid + ' to see the results.'
                         );
                     })
                     .catch(function(reason) {
@@ -179,8 +183,7 @@
         })
         .catch(function(reason) {
             logger.error(
-                'Unable to continue, there has been an error.',
-                reason
+                'Unable to continue, there has been an error.'
             );
             process.exit(1);
         })
