@@ -213,38 +213,40 @@
         var result;
 
         return new Promise(function(resolve, reject) {
-            try {                
-                if (authorization) {
-                    customAuthorizationHeader = '-H \'Authorization: ' + authorization + '\'';
-                }
+            if (authorization) {
+                customAuthorizationHeader = '-H \'Authorization: ' + authorization + '\'';
+            }
 
-                if (header) {
-                    customHeader = '-H \'' + header + '\'';
-                }
+            if (header) {
+                customHeader = '-H \'' + header + '\'';
+            }
 
-                var testRun = child.spawnSync(
-                    'wrk',
-                    [
-                        '-t1',
-                        customHeader,
-                        customAuthorizationHeader,
-                        '-c' + concurrency,
-                        '-d' + duration + 's',                        
-                        '--latency',
-                        url
-                    ]
-                );
+            var testRun = child.spawnSync(
+                'wrk',
+                [
+                    '-t1',
+                    customHeader,
+                    customAuthorizationHeader,
+                    '-c' + concurrency,
+                    '-d' + duration + 's',                        
+                    '--latency',
+                    url
+                ]
+            );
 
+            try {
                 result = testRun.stdout.toString();
                 var parsedResult = parseWrk(result, concurrency);
-                logger.info('Your results are in! Sleeping for ' + delay + 's...', parsedResult);
+                logger.info('Your results are in! Sleeping for ' + delay + 's...', parsedResult);                    
                 resolve(parsedResult);
-
-                child.spawnSync('sleep', [delay]);
-                logger.info('Resuming...');
             } catch(e) {
-                reject(e);
+                delay = 3;
+                logger.error('Your test has failed... Are you sure you have access to ' + url + ' ? Sleeping for ' + delay + 's...');
+                reject();
             }
+
+            child.spawnSync('sleep', [delay]);
+            logger.info('Resuming...');
         });
     }
 })();

@@ -152,7 +152,7 @@
                 }
             }).catch(function(e) {
                 logger.error(
-                    'Unable to proceed with one of your load tests, please retry.'
+                    'Unable to proceed with load testing, please check your parameters and retry.'
                 );
 
                 throw e;

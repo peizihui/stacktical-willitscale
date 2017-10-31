@@ -48,7 +48,7 @@
 
         return baseRequestP(loadSubmitOptions)
             .finally(function() {
-                logger.info('Your capacity test is about to finish...');
+                logger.info('Your scalability test is about to finish...');
             });
     };
 })();
