@@ -1,9 +1,12 @@
-FROM node:6
+FROM node:6-slim
 
 RUN useradd --user-group --create-home --shell /bin/false stacktical
 
-RUN apt-get update && \
-  apt-get install build-essential libssl-dev git -y
+RUN apt-get update && apt-get install -y \
+  build-essential \
+  libssl-dev \
+  git \
+&& rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/wg/wrk.git wrk && \
   cd wrk && \
