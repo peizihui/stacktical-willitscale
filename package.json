@@ -1,7 +1,7 @@
 {
-  "name": "StackticalBench",
-  "version": "0.0.1",
-  "description": "A Stacktical Platform solution that combines the Benchmarking and the Scalability Testing of your Stacktical Application.",
+  "name": "willitscale",
+  "version": "1.1.0",
+  "description": "A Stacktical Platform client that combines the Benchmarking and the Scalability Testing of your Stacktical Application.",
   "license": "SEE LICENSE IN LICENSE.md",
   "private": true,
   "main": "public/src/stacktical.js",
@@ -23,7 +23,7 @@
     "precheckstyle": "mkdir -p ./tests/reports/lint/",
     "checkstyle": "eslint -f checkstyle src tests > ./tests/reports/lint/report.xml"
   },
-  "author": "Stacktical, Inc",
+  "author": "Stacktical",
   "homepage": "https://stacktical.com",
   "devDependencies": {
     "babel-eslint": "^7.1.1",

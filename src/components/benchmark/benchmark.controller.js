@@ -205,33 +205,43 @@
 
     function loadTest(url, concurrency, duration, delay, header, authorization) {
         concurrency = Math.trunc(concurrency);
-        var customHeader;
-        var customAuthorizationHeader;
+        var customHeader = '';
+        var customAuthorizationHeader = '';
+        var testFlags = [];
         
         logger.info('Started load testing against ' + url + ' with a concurrency of ' + concurrency);
         
         var result;
 
         return new Promise(function(resolve, reject) {
+            testFlags = [
+                "-t1",
+                "-c" + concurrency,
+                "-d" + duration + "s",                        
+                "--latency"
+            ];
+
             if (authorization) {
-                customAuthorizationHeader = '-H \'Authorization: ' + authorization + '\'';
+                customAuthorizationHeader = authorization;
+                logger.info('Using the specified authorization header for this test.');
+
+                testFlags.push("-H");
+                testFlags.push("Authorization: " + customAuthorizationHeader);
             }
 
             if (header) {
-                customHeader = '-H \'' + header + '\'';
+                customHeader = header;
+                logger.info('Using the specified custom header for this test.');
+
+                testFlags.push("-H");
+                testFlags.push(customHeader);
             }
+
+            testFlags.push(url);
 
             var testRun = child.spawnSync(
                 'wrk',
-                [
-                    '-t1',
-                    customHeader,
-                    customAuthorizationHeader,
-                    '-c' + concurrency,
-                    '-d' + duration + 's',                        
-                    '--latency',
-                    url
-                ]
+                testFlags
             );
 
             try {
