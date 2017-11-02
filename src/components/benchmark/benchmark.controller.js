@@ -14,6 +14,8 @@
 
     var config = require(__base +'config/config.js')();
 
+    var child = require('child_process');
+    
     /**
     * INTERFACES *
     *************/
@@ -95,86 +97,166 @@
         });
     };
 
-    function loadTest(url, concurrency, time, delay) {
+    function parseWrk(stdout, concurrency) {
+        var lines = stdout.split('\n');
+        var result = {};
+        result.concurrency = concurrency;
+        result.throughput = lines[lines.length - 2].split(':')[1].trim();
+        result.transactionRate = Number(lines[lines.length - 3].split(':')[1].trim());
+
+        var errorsLine = 0;
+        for (var i = 0; i < lines.length; i++) {
+            if (handleErrors(lines[i], result)) {
+                errorsLine++;
+            }
+        }
+
+        var m = lines[lines.length - 4 - errorsLine].match(/(\d+) requests in ([0-9\.]+[A-Za-z]+), ([0-9\.]+[A-Za]+)/);
+        result.transactions = Number(m[1]);
+        result.elapsedTime = m[2];
+        result.dataTransferred = m[3];
+
+        var latencyMinMax = lines[3].split(/[\t ]+/);
+
+        result.responseTime = latencyMinMax[2];
+
+        function round(value, decimals) {
+            return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+        }
+
+        if (/ms/i.test(result.responseTime)) {
+            logger.info('Spotted response time in ms unit, converting...');
+            result.responseTime = result.responseTime.replace('ms','');
+            result.responseTime = round(result.responseTime / 1000, 3);
+            logger.info('Converted to ' + result.responseTime + ' seconds!');
+        }
+
+        if (/m/i.test(result.responseTime)) {
+            logger.info('Spotted response time in m unit, converting...');            
+            result.responseTime = result.responseTime.replace('m','');
+            result.responseTime = round(result.responseTime * 60, 3);
+            logger.info('Converted to ' + result.responseTime + ' seconds!');            
+        }
+
+        if (/h/i.test(result.responseTime)) {
+            logger.info('Spotted response time in h unit, converting...');                        
+            result.responseTime = result.responseTime.replace('h','');
+            result.responseTime = round(result.responseTime * 3600, 3);
+            logger.info('Converted to ' + result.responseTime + ' seconds!');            
+        }
+
+        result.latencyAvg = latencyMinMax[2];
+        result.latencyStdev = latencyMinMax[3];
+        result.latencyMax = latencyMinMax[4];
+        result.latencyStdevPerc = Number(latencyMinMax[5].slice(0, -1));
+        var rpsMinMax = lines[4].split(/[\t ]+/);
+        result.rpsAvg = rpsMinMax[2];
+        result.rpsStdev = rpsMinMax[3];
+        result.rpsMax = rpsMinMax[4];
+        result.rpsStdevPerc = Number(rpsMinMax[5].slice(0, -1));
+
+        if (lines[5].match(/Latency Distribution/)) {
+            result.latency50 = lines[6].split(/[\t ]+/)[2];
+            result.latency75 = lines[7].split(/[\t ]+/)[2];
+            result.latency90 = lines[8].split(/[\t ]+/)[2];
+            result.latency99 = lines[9].split(/[\t ]+/)[2];
+        }
+
+        var histogram = [];
+        for (var i = 0; i < lines.length; ++i) {
+            if (lines[i].match(/Detailed Percentile spectrum:/) && i < lines.length - 3) {
+                for (var l = i + 4; lines[l] != ''; ++l) {
+                    var nums = lines[l].trim().split(/[ \t]+/);
+                    if (nums.length != 4) break;
+                    console.log('Histo: ', nums);
+                    histogram.push({
+                        latency: Number(nums[0]),
+                        percentile: Number(nums[1]),
+                        total: Number(nums[2])
+                    });
+                }
+                break;
+            }
+        }
+        if (histogram.length) {
+            result.histogram = histogram;
+        }
+        return result;
+    }
+
+    function handleErrors(line, result) {
+        var errorsRe = /Socket errors: connect (\d+), read (\d+), write (\d+), timeout (\d+)/;
+        var errorsMatch = line.match(errorsRe);
+        if (errorsMatch) {
+            result.connectErrors = errorsMatch[1];
+            result.readErrors = errorsMatch[2];
+            result.writeErrors = errorsMatch[3];
+            result.timeoutErrors = errorsMatch[4];
+            return true
+        }
+
+        var non2xx3xx = /Non-2xx or 3xx responses: (\d+)/;
+        var non2xx3xxMatch = line.match(non2xx3xx);
+        if (non2xx3xxMatch) {
+            result.non2xx3xx = Number(non2xx3xxMatch[1]);
+            return true
+        }
+    }
+
+    function loadTest(url, concurrency, duration, delay, header, authorization) {
+        concurrency = Math.trunc(concurrency);
+        var customHeader = '';
+        var customAuthorizationHeader = '';
+        var testFlags = [];
+        
         logger.info('Started load testing against ' + url + ' with a concurrency of ' + concurrency);
+        
+        var result;
 
         return new Promise(function(resolve, reject) {
-            var result;
+            testFlags = [
+                "-t1",
+                "-c" + concurrency,
+                "-d" + duration + "s",                        
+                "--latency"
+            ];
 
-            var spawn = require('child_process');
+            if (authorization) {
+                customAuthorizationHeader = authorization;
+                logger.info('Using the specified authorization header for this test.');
 
-            var loadTest = spawn.spawnSync(
-                'siege',
-                [
-                    '-t' + time + 's',
-                    '-c' + concurrency,
-                    '-b',
-                    url
-                ]
+                testFlags.push("-H");
+                testFlags.push("Authorization: " + customAuthorizationHeader);
+            }
+
+            if (header) {
+                customHeader = header;
+                logger.info('Using the specified custom header for this test.');
+
+                testFlags.push("-H");
+                testFlags.push(customHeader);
+            }
+
+            testFlags.push(url);
+
+            var testRun = child.spawnSync(
+                'wrk',
+                testFlags
             );
 
-            logger.info('Done! Sleeping for ' + delay + 's...');
-            spawn.spawnSync('sleep', [delay]);
+            try {
+                result = testRun.stdout.toString();
+                var parsedResult = parseWrk(result, concurrency);
+                logger.info('Your results are in! Sleeping for ' + delay + 's...', parsedResult);                    
+                resolve(parsedResult);
+            } catch(e) {
+                delay = 3;
+                logger.error('Your test has failed... Are you sure you have access to ' + url + ' ? Sleeping for ' + delay + 's...');
+                reject();
+            }
+
+            child.spawnSync('sleep', [delay]);
             logger.info('Resuming...');
-
-            // For some reason, the transaction rate is part of stderr, not stdout
-            result = loadTest.stderr.toString();
-
-            var bufferResult = result.split('\n');
-            var validSiegeMetrics = [
-                'Concurrency',
-                'Transaction rate',
-                'Transactions',
-                'Availability',
-                'Elapsed time',
-                'Data transferred',
-                'Response time',
-                'Throughput',
-                'Successful transactions',
-                'Failed transactions',
-                'Longest transaction',
-                'Shortest transaction'
-            ];
-            var bufferResult = bufferResult.filter(function(std) {
-                return validSiegeMetrics.some(function(metric) {
-                    return std.indexOf(metric) > -1;
-                });
-            });
-
-            for (var i = bufferResult.length - 1; i >= 0; i--) {
-                bufferResult[i] = bufferResult[i].split(':');
-                bufferResult[i][0] = camelCase(lodash.trim(bufferResult[i][0]));
-                bufferResult[i][1] = parseFloat(
-                    lodash.trim(
-                        bufferResult[i][1].split(/%|secs|hits|trans\/sec|MB\/sec|MB/g)
-                            .join('')
-                    )
-                );
-            }
-
-            /**
-             * @param {object} array
-             * @return {array}
-             */
-            function objectify(array) {
-                return array.reduce(function(p, c) {
-                    p[c[0]] = c[1];
-                    return p;
-                }, {});
-            }
-
-            if (bufferResult) {
-                if (objectify(bufferResult)) {
-                    logger.info(objectify(bufferResult));
-                    resolve(objectify(bufferResult));
-                } else {
-                    resolve(false);
-                }
-            } else {
-                reject({
-                    err: error
-                });
-            };
         });
     }
 })();

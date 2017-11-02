@@ -1,8 +1,8 @@
 bench:
   build: .
-  command: node_modules/.bin/mocha --watch tests/benchTest.js
+  command: node_modules/.bin/mocha --watch tests/setup.js
   environment:
     NODE_ENV: development
   volumes:
-    - .:/home/app/bench
-    - /home/app/bench/node_modules
+    - .:/home/app/willitscale
+    - /home/app/willitscale/node_modules

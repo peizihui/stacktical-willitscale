@@ -50,19 +50,25 @@
             for (var i = 0; i < service.test_parameters.workload.length; i++) {
                 var concurrency = service.test_parameters.workload[i].concurrency;
                 var duration = service.test_parameters.duration;
-                var delay = service.test_parameters.delay || 10;
-
+                var delay = service.test_parameters.delay || 30;
+                var header = service.test_parameters.header;
+                var authorization = service.test_parameters.authorization;
+                
                 benchmarkPromises.push(
                     benchmark.loadTest(
                         service.url,
                         concurrency,
                         duration,
-                        delay
+                        delay,
+                        header,
+                        authorization
                     )
                 );
             }
 
             Promise.all(benchmarkPromises).then(function(loadTestResult) {
+                logger.info('New test data available: ', loadTestResult);
+
                 if (service.test_parameters.autoclean == true) {
                     var previousIndex;
                     var nextIndex;
@@ -144,10 +150,12 @@
                         workloadPromises.push(benchmark.storeTestResult(apiKey, appId, testId, loadTestResult[j]));
                     }
                 }
-            }).catch(function(reason) {
+            }).catch(function(e) {
                 logger.error(
-                    'Unable to proceed with one of your load tests, please retry.'
+                    'Unable to proceed with load testing, please check your parameters and retry.'
                 );
+
+                throw e;
             }).then(function() {
                 var createScalabilityReportPayload = loadResults;
                 createScalabilityReportPayload.test_id = testId;
@@ -156,10 +164,10 @@
 
                 logger.info('The scalability test will use the following data: ', createScalabilityReportPayload);
                 reports.createScalabilityReport(apiKey, appId, createScalabilityReportPayload)
-                    .then(function() {
+                    .then(function(response) {
                         logger.info(
                             'Congratulations! Your scalability test is now complete. ' +
-                            'Please go to stacktical.com to see the results.'
+                            'Please go to https://stacktical.com/willitscale/' + response.report.serial + ' to see the results.'
                         );
                     })
                     .catch(function(reason) {
