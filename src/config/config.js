@@ -5,12 +5,10 @@ module.exports = function() {
     if (process.env.STACKTICAL_API_HOST) {
         return {
             apiUrl : apiEnv,
-            debug : debug
         };
     } else {
         return {
             apiUrl : 'https://stacktical.com/api/v1',
-            debug : false
         };
     }
 }
