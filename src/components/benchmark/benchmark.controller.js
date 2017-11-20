@@ -6,6 +6,8 @@
     ***************/
 
     var util = require('util');
+    var http = require('http');
+    var fs = require('fs');
     var Promise = require('bluebird');
     var requestP = require('request-promise');
     var logger = require(__base + 'logger/logger.winston')(module);
@@ -235,6 +237,16 @@
 
                 testFlags.push("-H");
                 testFlags.push(customHeader);
+            }
+
+            if (script_url) {
+                logger.info('Downloading the lua script.');
+
+                var file = fs.createWriteStream("script.lua");
+                var request = http.get(script_url, function(response) {
+                  response.pipe(file);
+                });
+                testFlags.push("-s script.lua");
             }
 
             testFlags.push(url);

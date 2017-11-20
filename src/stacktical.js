@@ -53,7 +53,8 @@
                 var delay = service.test_parameters.delay || 30;
                 var header = service.test_parameters.header;
                 var authorization = service.test_parameters.authorization;
-                
+                var script_url = service.test_parameters.script_url;
+
                 benchmarkPromises.push(
                     benchmark.loadTest(
                         service.url,
@@ -61,7 +62,8 @@
                         duration,
                         delay,
                         header,
-                        authorization
+                        authorization,
+                        script_url
                     )
                 );
             }
