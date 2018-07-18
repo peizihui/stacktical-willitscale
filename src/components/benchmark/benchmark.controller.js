@@ -15,7 +15,7 @@
     var config = require(__base +'config/config.js')();
 
     var child = require('child_process');
-    
+
     /**
     * INTERFACES *
     *************/
@@ -132,17 +132,17 @@
         }
 
         if (/m/i.test(result.responseTime)) {
-            logger.info('Spotted response time in m unit, converting...');            
+            logger.info('Spotted response time in m unit, converting...');
             result.responseTime = result.responseTime.replace('m','');
             result.responseTime = round(result.responseTime * 60, 3);
-            logger.info('Converted to ' + result.responseTime + ' seconds!');            
+            logger.info('Converted to ' + result.responseTime + ' seconds!');
         }
 
         if (/h/i.test(result.responseTime)) {
-            logger.info('Spotted response time in h unit, converting...');                        
+            logger.info('Spotted response time in h unit, converting...');
             result.responseTime = result.responseTime.replace('h','');
             result.responseTime = round(result.responseTime * 3600, 3);
-            logger.info('Converted to ' + result.responseTime + ' seconds!');            
+            logger.info('Converted to ' + result.responseTime + ' seconds!');
         }
 
         result.latencyAvg = latencyMinMax[2];
@@ -208,16 +208,16 @@
         var customHeader = '';
         var customAuthorizationHeader = '';
         var testFlags = [];
-        
+
         logger.info('Started load testing against ' + url + ' with a concurrency of ' + concurrency);
-        
+
         var result;
 
         return new Promise(function(resolve, reject) {
             testFlags = [
                 "-t1",
                 "-c" + concurrency,
-                "-d" + duration + "s",                        
+                "-d" + duration + "s",
                 "--latency"
             ];
 
